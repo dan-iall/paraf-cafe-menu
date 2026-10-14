@@ -1,4 +1,4 @@
-/* Paraf Café — menu interactions: theme, search, category scroll-spy, back-to-top */
+/* Paraph Café — menu interactions: theme, search, category scroll-spy, back-to-top */
 (function () {
     'use strict';
 
