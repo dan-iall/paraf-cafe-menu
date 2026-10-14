@@ -1,0 +1,20 @@
+{
+	admin off
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode gzip
+
+	# Server files are not part of the menu
+	@private path /Dockerfile /Caddyfile /.nojekyll
+	respond @private 404
+
+	header {
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+		-Server
+	}
+	file_server
+}
