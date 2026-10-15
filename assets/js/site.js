@@ -284,6 +284,12 @@
         var s = document.createElement('script');
         s.src = 'assets/js/main.js?v=5';
         document.body.appendChild(s);
+
+        // The cards fade in when scrolled into view (main.js). Never leave them hidden if that
+        // doesn't happen (slow connection, background tab, old browser).
+        setTimeout(function () {
+            document.querySelectorAll('.category').forEach(function (c) { c.classList.add('is-in'); });
+        }, 1200);
     }
 
     function showError() {

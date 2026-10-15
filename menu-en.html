@@ -2,6 +2,8 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+    <meta name="referrer" content="same-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Paraph Café — Menu</title>
     <meta name="description" content="">
@@ -9,22 +11,15 @@
     <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link id="fonts" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="assets/css/style.css?v=5">
+    <link rel="preload" href="assets/js/main.js?v=5" as="script">
     <style id="themeColors"></style>
-    <script>
-        // Before paint: JS flag, saved light/dark choice, last known café colours.
-        document.documentElement.className += ' js';
-        try {
-            var th = localStorage.getItem('theme');
-            if (th === 'dark' || th === 'light') document.documentElement.setAttribute('data-theme', th);
-            var css = localStorage.getItem('paraph_theme_css');
-            if (css) document.getElementById('themeColors').textContent = css;
-        } catch (e) {}
-    </script>
+    <script src="assets/js/boot.js?v=6"></script>
 </head>
 <body data-page="menu">
     <noscript><p style="padding:40px 16px;text-align:center">برای مشاهده منو جاوااسکریپت را فعال کنید · Please enable JavaScript to view the menu.</p></noscript>
-    <script src="assets/js/site.js?v=5" defer></script>
+    <script src="assets/js/site.js?v=6" defer></script>
 </body>
 </html>

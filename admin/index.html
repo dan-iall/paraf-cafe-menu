@@ -2,6 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <meta name="referrer" content="no-referrer">
@@ -11,9 +12,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/admin.css?v=5">
-    <script>
-        try { var th = localStorage.getItem('theme'); if (th) document.documentElement.setAttribute('data-theme', th); } catch (e) {}
-    </script>
     <style>
         .gh-top { position: sticky; top: 0; z-index: 30; background: var(--choco-deep); color: var(--cream); box-shadow: 0 8px 24px -16px rgba(0, 0, 0, .6); }
         .gh-top__in { max-width: 1150px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -46,6 +44,6 @@
 <body>
     <div id="app"><p class="loading">در حال بارگذاری…</p></div>
     <noscript><p style="padding:40px 16px;text-align:center">برای استفاده از پنل مدیریت، جاوااسکریپت را فعال کنید.</p></noscript>
-    <script src="../assets/js/admin.js?v=5" defer></script>
+    <script src="../assets/js/admin.js?v=6" defer></script>
 </body>
 </html>

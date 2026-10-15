@@ -6,6 +6,14 @@
 (function () {
     'use strict';
 
+    /* ---------- Never run inside another site's frame (clickjacking protection) ---------- */
+    if (window.top !== window.self) {
+        document.getElementById('app').textContent = 'این صفحه را مستقیما باز کنید.';
+        try { window.top.location = window.location.href; } catch (e) {}
+        return;
+    }
+    try { var th = localStorage.getItem('theme'); if (th === 'dark' || th === 'light') document.documentElement.setAttribute('data-theme', th); } catch (e) {}
+
     /* ---------- Repository (derived from the address, e.g. salehlava.github.io/paraf-cafe-menu) ---------- */
     var OWNER = 'salehlava', REPO = 'paraf-cafe-menu', BRANCH = 'main';
     (function () {
@@ -141,7 +149,7 @@
             });
         } }, [
             el('label', { 'class': 'field' }, [el('span', null, ['کلید دسترسی GitHub']), input]),
-            el('label', { 'class': 'check' }, [remember, ' روی این دستگاه به خاطر بسپار']),
+            el('label', { 'class': 'check' }, [remember, ' روی این دستگاه به خاطر بسپار (فقط روی دستگاه شخصی)']),
             btn
         ]);
 
