@@ -1,0 +1,28 @@
+{
+    "name": {
+        "fa": "کافه پاراف",
+        "en": "Paraph Café"
+    },
+    "tagline": {
+        "fa": "رد پای نگاهت، ذهن و روحت را اینجا پاراف کن",
+        "en": "Leave the trace of your gaze — sign your mind and soul here"
+    },
+    "hours": {
+        "fa": "هر روز ۸ صبح تا ۱۱ شب",
+        "en": "Daily 8 AM – 11 PM"
+    },
+    "address": {
+        "fa": "انتهای خیابان ملک، ابتدای کوچه مسعودی، جنب فروشگاه دیوید جونز",
+        "en": "End of Malek St., start of Masoudi Alley, next to David Jones store"
+    },
+    "phone": "+98 900 000 0000",
+    "instagram": "https://instagram.com/paraph.cafe",
+    "colors": {
+        "primary": "#4a2c1d",
+        "dark": "#2b1a12",
+        "accent": "#c08a5b",
+        "cream": "#f3e5cf",
+        "bg_light": "#f5ede1",
+        "bg_dark": "#0f0a07"
+    }
+}

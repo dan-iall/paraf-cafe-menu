@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>پنل مدیریت آنلاین — کافه پاراف</title>
+    <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=5">
+    <script>
+        try { var th = localStorage.getItem('theme'); if (th) document.documentElement.setAttribute('data-theme', th); } catch (e) {}
+    </script>
+    <style>
+        .gh-top { position: sticky; top: 0; z-index: 30; background: var(--choco-deep); color: var(--cream); box-shadow: 0 8px 24px -16px rgba(0, 0, 0, .6); }
+        .gh-top__in { max-width: 1150px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .gh-top__in + .gh-top__in { padding-top: 0; }
+        .gh-brand { display: flex; align-items: center; gap: 10px; }
+        .gh-brand strong { display: block; font-size: .95rem; }
+        .gh-brand small { color: var(--caramel); font-size: .75rem; }
+        .tabs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(243, 229, 207, .1); margin-inline-start: auto; }
+        .tab { border: 0; background: none; color: rgba(243, 229, 207, .75); font: inherit; font-weight: 600; padding: 6px 16px; border-radius: 999px; cursor: pointer; }
+        .tab.is-active { background: var(--cream); color: var(--choco-deep); }
+        .gh-actions { display: flex; gap: 8px; align-items: center; }
+        .gh-actions .btn:not(.btn--primary) { background: transparent; color: var(--cream); border-color: rgba(243, 229, 207, .3); }
+        .gh-actions .btn--primary { background: var(--caramel); border-color: var(--caramel); color: #1a0f0a; }
+        .gh-actions .btn--primary:disabled { opacity: .55; cursor: default; filter: none; }
+        .status { font-size: .88rem; min-height: 0; }
+        .status:empty { display: none; }
+        .status--ok { color: #9fe0af; font-weight: 700; }
+        .status--err { color: #ffb4ab; font-weight: 700; }
+        .gh-wrap { max-width: 1150px; margin: 0 auto; padding: 20px 16px 80px; }
+        .add-item { margin-top: 10px; }
+        .is-invalid, .is-invalid input { border-color: var(--err) !important; background: rgba(190, 50, 40, .08); }
+        .loading { text-align: center; padding: 80px 16px; color: var(--muted); }
+        .help { margin-top: 18px; text-align: start; font-size: .88rem; }
+        .help summary { cursor: pointer; color: var(--caramel); font-weight: 600; }
+        .help ol { padding-inline-start: 20px; line-height: 1.9; }
+        .help a { color: var(--caramel); word-break: break-all; }
+        @media (max-width: 760px) { .tabs { margin-inline-start: 0; order: 3; width: 100%; justify-content: center; } }
+    </style>
+</head>
+<body>
+    <div id="app"><p class="loading">در حال بارگذاری…</p></div>
+    <noscript><p style="padding:40px 16px;text-align:center">برای استفاده از پنل مدیریت، جاوااسکریپت را فعال کنید.</p></noscript>
+    <script src="../assets/js/admin.js?v=5" defer></script>
+</body>
+</html>
