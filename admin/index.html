@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com; base-uri 'none'; form-action 'none'">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <meta name="referrer" content="no-referrer">
@@ -38,12 +38,14 @@
         .help summary { cursor: pointer; color: var(--caramel); font-weight: 600; }
         .help ol { padding-inline-start: 20px; line-height: 1.9; }
         .help a { color: var(--caramel); word-break: break-all; }
+        .auth__box p a { color: var(--caramel); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+        .account hr { border: 0; border-top: 1px dashed var(--line); margin: 4px 0; }
         @media (max-width: 760px) { .tabs { margin-inline-start: 0; order: 3; width: 100%; justify-content: center; } }
     </style>
 </head>
 <body>
     <div id="app"><p class="loading">در حال بارگذاری…</p></div>
     <noscript><p style="padding:40px 16px;text-align:center">برای استفاده از پنل مدیریت، جاوااسکریپت را فعال کنید.</p></noscript>
-    <script src="../assets/js/admin.js?v=6" defer></script>
+    <script src="../assets/js/admin.js?v=7" defer></script>
 </body>
 </html>

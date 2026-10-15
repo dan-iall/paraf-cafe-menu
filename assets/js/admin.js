@@ -126,57 +126,183 @@
     var root = document.getElementById('app');
     function show(nodes) { root.replaceChildren.apply(root, [].concat(nodes)); }
 
-    /* ---------- Login ---------- */
+    /* ---------- Username + password ----------
+     * GitHub only accepts saves made with a GitHub key. The key is stored in data/auth.json,
+     * LOCKED (AES-256-GCM) with a key derived from username + password (PBKDF2-SHA256, 600,000 rounds).
+     * That file is public, so the password is the only protection: strong passwords are required.
+     */
+    var AUTH_FILE = 'data/auth.json';
+    var PBKDF2_ROUNDS = 600000;
+    var MIN_PASSWORD = 10;
+    var authCfg = null;          // contents of data/auth.json; null = not set up yet
+    var notice = null;           // message to show once the editor opens
+
+    function bytesToB64(bytes) { var s = ''; for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); }
+    function b64ToBytes(str) { var bin = atob(str), out = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
+
+    function deriveKey(user, pass, salt, rounds) {
+        var secret = new TextEncoder().encode(user.trim().toLowerCase() + '\n' + pass);
+        return crypto.subtle.importKey('raw', secret, 'PBKDF2', false, ['deriveKey']).then(function (base) {
+            return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: rounds, hash: 'SHA-256' },
+                base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+        });
+    }
+    function lockKey(ghKey, user, pass) {
+        var salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+        return deriveKey(user, pass, salt, PBKDF2_ROUNDS).then(function (k) {
+            return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, k, new TextEncoder().encode(ghKey));
+        }).then(function (ct) {
+            return { v: 1, kdf: 'PBKDF2-SHA256', rounds: PBKDF2_ROUNDS, cipher: 'AES-256-GCM',
+                     salt: bytesToB64(salt), iv: bytesToB64(iv), data: bytesToB64(new Uint8Array(ct)) };
+        });
+    }
+    /** Wrong username or password -> rejects with Error('bad'). */
+    function unlockKey(cfg, user, pass) {
+        return deriveKey(user, pass, b64ToBytes(cfg.salt), cfg.rounds || PBKDF2_ROUNDS).then(function (k) {
+            return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToBytes(cfg.iv) }, k, b64ToBytes(cfg.data));
+        }).then(function (pt) { return new TextDecoder().decode(pt); }, function () { throw new Error('bad'); });
+    }
+    function fetchAuth() {
+        return fetch('../' + AUTH_FILE + '?v=' + Date.now(), { cache: 'no-store' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (j) { return j && j.data && j.salt && j.iv ? j : null; })
+            .catch(function () { return null; });
+    }
+    /** Check that a GitHub key can access the repository; makes it the active key. */
+    function checkKey(t) {
+        token = t;
+        return api('').then(function (r) {
+            if (r.status === 401) throw new Error('کلید GitHub نامعتبر یا منقضی است.');
+            if (r.status === 404 || r.status === 403) throw new Error('این کلید GitHub به مخزن ' + OWNER + '/' + REPO + ' دسترسی ندارد.');
+            if (r.status !== 200) throw new Error('خطای GitHub (' + r.status + ').');
+        });
+    }
+    /** Save data/auth.json (needs a working key). */
+    function saveAuth(cfg) {
+        return api('/contents/' + AUTH_FILE + '?ref=' + BRANCH).then(function (r) {
+            var body = { message: 'Update admin login (online admin)', content: toB64(serialize(cfg)), branch: BRANCH };
+            if (r.status === 200) body.sha = r.json.sha;
+            return api('/contents/' + AUTH_FILE, 'PUT', body);
+        }).then(function (r) {
+            if (r.status === 200 || r.status === 201) { authCfg = cfg; return; }
+            if (r.status === 403 || r.status === 404) throw new Error('این کلید GitHub اجازه ذخیره ندارد (Contents باید «Read and write» باشد).');
+            throw new Error('ذخیره حساب انجام نشد (' + r.status + ').');
+        });
+    }
+    function credentialsError(user, pass, pass2) {
+        if (!/^[A-Za-z0-9_.-]{3,32}$/.test(user)) return 'نام کاربری باید ۳ تا ۳۲ حرف انگلیسی، عدد یا . _ - باشد.';
+        if (pass.length < MIN_PASSWORD) return 'رمز عبور باید حداقل ' + fa(MIN_PASSWORD) + ' کاراکتر باشد.';
+        if (!/[A-Za-z]/.test(pass) || !/[0-9]/.test(pass)) return 'رمز عبور باید هم حرف انگلیسی و هم عدد داشته باشد.';
+        if (pass.toLowerCase().indexOf(user.toLowerCase()) !== -1) return 'رمز عبور نباید شامل نام کاربری باشد.';
+        if (pass !== pass2) return 'تکرار رمز عبور یکسان نیست.';
+        return null;
+    }
+
+    function authPage(title, subtitle, error, content) {
+        show(el('main', { 'class': 'auth' }, [
+            el('div', { 'class': 'auth__box' }, [
+                el('span', { 'class': 'mark mark--lg' }, ['P']),
+                el('h1', null, [title]),
+                el('p', { 'class': 'muted' }, [subtitle]),
+                error ? el('div', { 'class': 'alert alert--error' }, [error]) : null
+            ].concat(content, [el('a', { 'class': 'auth__back', href: '../' }, ['← بازگشت به منو'])]))
+        ]));
+    }
+    function keyHelp() {
+        return el('details', { 'class': 'help' }, [
+            el('summary', null, ['کلید GitHub را چطور بسازم؟']),
+            el('ol', null, [
+                el('li', null, ['وارد حساب GitHub شوید و این صفحه را باز کنید: ', el('a', { href: 'https://github.com/settings/personal-access-tokens/new', target: '_blank', rel: 'noopener', dir: 'ltr' }, ['github.com/settings/personal-access-tokens/new'])]),
+                el('li', null, ['Token name: یک نام دلخواه، مثلا Paraph menu — Expiration: مثلا ۹۰ روز']),
+                el('li', null, ['Repository access: گزینه Only select repositories و انتخاب ', el('b', { dir: 'ltr' }, [REPO])]),
+                el('li', null, ['Permissions → Repository permissions → Contents: ', el('b', null, ['Read and write'])]),
+                el('li', null, ['Generate token را بزنید و کلید (شروع با github_pat_) را اینجا وارد کنید.'])
+            ])
+        ]);
+    }
+    function input(type, attrs) { return el('input', Object.assign({ type: type, dir: 'ltr', required: true }, attrs || {})); }
+    function busyButton(btn, on, label) { btn.disabled = on; btn.textContent = label; }
+
+    /** Normal login: username + password. */
     function renderLogin(error) {
-        var input = el('input', { type: 'password', dir: 'ltr', autocomplete: 'off', placeholder: 'github_pat_…', required: true });
+        var user = input('text', { autocomplete: 'username' });
+        var pass = input('password', { autocomplete: 'current-password' });
         var remember = el('input', { type: 'checkbox' });
         var btn = el('button', { 'class': 'btn btn--primary btn--block', type: 'submit' }, ['ورود']);
         var form = el('form', { 'class': 'form', onsubmit: function (e) {
             e.preventDefault();
-            var t = input.value.trim();
-            if (!t) return;
-            btn.disabled = true; btn.textContent = 'در حال بررسی…';
-            token = t;
-            api('').then(function (r) {
-                if (r.status === 401) throw new Error('کلید نامعتبر یا منقضی است.');
-                if (r.status === 404 || r.status === 403) throw new Error('این کلید به مخزن ' + OWNER + '/' + REPO + ' دسترسی ندارد.');
-                if (r.status !== 200) throw new Error('خطای GitHub (' + r.status + ').');
-                storeToken(t, remember.checked);
-                return load();
+            busyButton(btn, true, 'در حال بررسی…');
+            unlockKey(authCfg, user.value, pass.value).then(function (key) {
+                return checkKey(key).then(function () { storeToken(key, remember.checked); return load(); }, function (err) {
+                    throw new Error(/منقضی/.test(err.message)
+                        ? 'کلید GitHub این حساب منقضی شده است. با «تنظیم دوباره» یک کلید جدید وارد کنید.' : err.message);
+                });
             }).catch(function (err) {
-                forgetToken();
-                renderLogin(err.message || 'اتصال به GitHub برقرار نشد.');
+                token = null;
+                renderLogin(err.message === 'bad' ? 'نام کاربری یا رمز عبور اشتباه است.' : (err.message || 'اتصال به GitHub برقرار نشد.'));
             });
         } }, [
-            el('label', { 'class': 'field' }, [el('span', null, ['کلید دسترسی GitHub']), input]),
-            el('label', { 'class': 'check' }, [remember, ' روی این دستگاه به خاطر بسپار (فقط روی دستگاه شخصی)']),
+            el('label', { 'class': 'field' }, [el('span', null, ['نام کاربری']), user]),
+            el('label', { 'class': 'field' }, [el('span', null, ['رمز عبور']), pass]),
+            el('label', { 'class': 'check' }, [remember, ' مرا به خاطر بسپار (فقط روی دستگاه شخصی)']),
             btn
         ]);
-
-        var help = el('details', { 'class': 'help' }, [
-            el('summary', null, ['کلید دسترسی را چطور بسازم؟']),
-            el('ol', null, [
-                el('li', null, ['وارد حساب GitHub خود شوید و این صفحه را باز کنید: ', el('a', { href: 'https://github.com/settings/personal-access-tokens/new', target: '_blank', rel: 'noopener', dir: 'ltr' }, ['github.com/settings/personal-access-tokens/new'])]),
-                el('li', null, ['Token name: یک نام دلخواه، مثلا Paraph menu']),
-                el('li', null, ['Repository access: گزینه Only select repositories و انتخاب ', el('b', { dir: 'ltr' }, [REPO])]),
-                el('li', null, ['Permissions → Repository permissions → Contents: ', el('b', null, ['Read and write'])]),
-                el('li', null, ['Generate token را بزنید و کلید (شروع با github_pat_) را اینجا وارد کنید.'])
-            ]),
-            el('p', { 'class': 'muted small' }, ['این کلید فقط در همین مرورگر ذخیره می‌شود و فقط به همین مخزن دسترسی دارد. آن را به کسی ندهید.'])
-        ]);
-
-        show(el('main', { 'class': 'auth' }, [
-            el('div', { 'class': 'auth__box' }, [
-                el('span', { 'class': 'mark mark--lg' }, ['P']),
-                el('h1', null, ['پنل مدیریت آنلاین منو']),
-                el('p', { 'class': 'muted' }, ['ورود با کلید دسترسی GitHub']),
-                error ? el('div', { 'class': 'alert alert--error' }, [error]) : null,
-                form,
-                help,
-                el('a', { 'class': 'auth__back', href: '../' }, ['← بازگشت به منو'])
+        authPage('پنل مدیریت آنلاین منو', 'ورود با نام کاربری و رمز عبور', error, [
+            form,
+            el('p', { 'class': 'muted small', style: 'margin-top:14px' }, [
+                'رمز را فراموش کرده‌اید یا کلید GitHub منقضی شده؟ ',
+                el('a', { href: '#', onclick: function (e) { e.preventDefault(); renderSetup(); } }, ['تنظیم دوباره'])
             ])
-        ]));
-        input.focus();
+        ]);
+        user.focus();
+    }
+
+    /** One-time setup (or reset): GitHub key once + choose username and password. */
+    function renderSetup(error) {
+        var key = input('password', { autocomplete: 'off', placeholder: 'github_pat_…' });
+        var user = input('text', { autocomplete: 'username' });
+        var pass = input('password', { autocomplete: 'new-password' });
+        var pass2 = input('password', { autocomplete: 'new-password' });
+        var btn = el('button', { 'class': 'btn btn--primary btn--block', type: 'submit' }, [authCfg ? 'ذخیره حساب جدید' : 'ساخت حساب']);
+        var form = el('form', { 'class': 'form', onsubmit: function (e) {
+            e.preventDefault();
+            var problem = credentialsError(user.value.trim(), pass.value, pass2.value);
+            if (problem) { renderSetup(problem); return; }
+            busyButton(btn, true, 'در حال ساخت حساب… (چند ثانیه)');
+            var k = key.value.trim();
+            checkKey(k).then(function () { return lockKey(k, user.value.trim(), pass.value); })
+                .then(saveAuth)
+                .then(function () {
+                    storeToken(k, false);
+                    notice = 'حساب ساخته شد ✓ از این به بعد با نام کاربری و رمز عبور وارد شوید (حدود ۱ دقیقه بعد فعال می‌شود).';
+                    return load();
+                }).catch(function (err) { token = null; renderSetup(err.message || 'اتصال به GitHub برقرار نشد.'); });
+        } }, [
+            el('label', { 'class': 'field' }, [el('span', null, ['کلید GitHub (فقط همین یک بار)']), key]),
+            el('label', { 'class': 'field' }, [el('span', null, ['نام کاربری دلخواه']), user]),
+            el('label', { 'class': 'field' }, [el('span', null, ['رمز عبور (حداقل ' + fa(MIN_PASSWORD) + ' کاراکتر، حرف و عدد)']), pass]),
+            el('label', { 'class': 'field' }, [el('span', null, ['تکرار رمز عبور']), pass2]),
+            btn
+        ]);
+        authPage(authCfg ? 'تنظیم دوباره حساب' : 'ساخت حساب مدیر',
+            authCfg ? 'نام کاربری و رمز قبلی با این حساب جایگزین می‌شود.' : 'یک بار کلید GitHub را وارد کنید و نام کاربری و رمز عبور بسازید.',
+            error, [
+                form,
+                el('p', { 'class': 'muted small', style: 'margin-top:12px' }, ['رمز عبور قوی انتخاب کنید: کلید GitHub با همین رمز قفل می‌شود.']),
+                keyHelp(),
+                authCfg ? el('p', { 'class': 'small', style: 'margin-top:12px' }, [el('a', { href: '#', onclick: function (e) { e.preventDefault(); renderLogin(); } }, ['← بازگشت به ورود'])]) : null
+            ]);
+        key.focus();
+    }
+
+    /** Show login (or first-time setup) depending on whether data/auth.json exists. */
+    function start(message) {
+        token = readToken();
+        if (token && !message) { load(); return; }
+        fetchAuth().then(function (cfg) {
+            authCfg = cfg;
+            if (cfg) renderLogin(message); else renderSetup(message);
+        });
     }
 
     /* ---------- Load data from GitHub ---------- */
@@ -197,7 +323,7 @@
             saved.menu = serialize(data.menu);
             renderApp();
         }).catch(function (err) {
-            if (err.message === 'auth') { forgetToken(); renderLogin('کلید منقضی شده است. دوباره وارد شوید.'); return; }
+            if (err.message === 'auth') { forgetToken(); start('نشست شما منقضی شده است. دوباره وارد شوید.'); return; }
             show(el('main', { 'class': 'auth' }, [el('div', { 'class': 'auth__box' }, [
                 el('div', { 'class': 'alert alert--error' }, [err.message]),
                 el('button', { 'class': 'btn', onclick: function () { load(); } }, ['تلاش دوباره'])
@@ -245,10 +371,10 @@
     function renderApp() {
         statusEl = el('div', { 'class': 'status', role: 'status' });
         saveBtn = el('button', { 'class': 'btn btn--primary', type: 'button', onclick: save }, ['ذخیره و انتشار']);
-        var tabs = [['menu', 'منو'], ['info', 'اطلاعات کافه'], ['colors', 'رنگ‌ها']].map(function (t) {
+        var tabs = [['menu', 'منو'], ['info', 'اطلاعات کافه'], ['colors', 'رنگ‌ها'], ['account', 'حساب']].map(function (t) {
             return el('button', { type: 'button', 'class': 'tab' + (tab === t[0] ? ' is-active' : ''), onclick: function () { tab = t[0]; renderApp(); } }, [t[1]]);
         });
-        var body = tab === 'menu' ? renderMenuTab() : tab === 'info' ? renderInfoTab() : renderColorsTab();
+        var body = tab === 'menu' ? renderMenuTab() : tab === 'info' ? renderInfoTab() : tab === 'colors' ? renderColorsTab() : renderAccountTab();
 
         show([
             el('header', { 'class': 'gh-top' }, [
@@ -266,13 +392,14 @@
             el('div', { 'class': 'gh-wrap' }, [body])
         ]);
         refreshSaveState();
+        if (notice) { setStatus('ok', notice); notice = null; }
     }
 
     function logout() {
         if (anyDirty() && !confirm('تغییرات ذخیره نشده از بین می‌روند. خارج می‌شوید؟')) return;
         forgetToken();
         data = { site: null, menu: null };
-        renderLogin();
+        start();
     }
 
     /* ---------- Inputs bound to the data ---------- */
@@ -439,6 +566,61 @@
         ]);
     }
 
+    /* ---------- Account tab: change username / password / GitHub key ---------- */
+    function renderAccountTab() {
+        var curUser = input('text', { autocomplete: 'username' });
+        var curPass = input('password', { autocomplete: 'current-password' });
+        var newUser = input('text', { autocomplete: 'off' });
+        var newPass = input('password', { autocomplete: 'new-password' });
+        var newPass2 = input('password', { autocomplete: 'new-password' });
+        var newKey = input('password', { autocomplete: 'off', placeholder: 'خالی = همان کلید فعلی', required: false });
+        var btn = el('button', { 'class': 'btn btn--primary', type: 'submit' }, ['ذخیره']);
+        var msg = el('div');
+        function say(type, text) { msg.replaceChildren(el('div', { 'class': 'alert alert--' + type }, [text])); }
+        var form = el('form', { 'class': 'form', onsubmit: function (e) {
+            e.preventDefault();
+            var problem = credentialsError(newUser.value.trim(), newPass.value, newPass2.value);
+            if (problem) { say('error', problem); return; }
+            if (!authCfg) { say('error', 'حساب هنوز ساخته نشده است.'); return; }
+            busyButton(btn, true, 'در حال ذخیره…');
+            var oldToken = token;
+            unlockKey(authCfg, curUser.value, curPass.value).then(function () {
+                var k = newKey.value.trim();
+                return (k ? checkKey(k) : Promise.resolve()).then(function () { return k || oldToken; });
+            }).then(function (k) {
+                return lockKey(k, newUser.value.trim(), newPass.value).then(saveAuth).then(function () {
+                    var remembered = false;
+                    try { remembered = !!localStorage.getItem(TOKEN_KEY); } catch (e2) {}
+                    storeToken(k, remembered);
+                });
+            }).then(function () {
+                busyButton(btn, false, 'ذخیره');
+                [curUser, curPass, newUser, newPass, newPass2, newKey].forEach(function (i) { i.value = ''; });
+                say('success', 'ذخیره شد ✓ از دفعه بعد با نام کاربری و رمز جدید وارد شوید (حدود ۱ دقیقه بعد فعال می‌شود).');
+            }).catch(function (err) {
+                token = oldToken;
+                busyButton(btn, false, 'ذخیره');
+                say('error', err.message === 'bad' ? 'نام کاربری یا رمز فعلی اشتباه است.' : (err.message || 'ذخیره نشد.'));
+            });
+        } }, [
+            el('label', { 'class': 'field' }, [el('span', null, ['نام کاربری فعلی']), curUser]),
+            el('label', { 'class': 'field' }, [el('span', null, ['رمز عبور فعلی']), curPass]),
+            el('hr'),
+            el('label', { 'class': 'field' }, [el('span', null, ['نام کاربری جدید (می‌تواند همان قبلی باشد)']), newUser]),
+            el('label', { 'class': 'field' }, [el('span', null, ['رمز عبور جدید (حداقل ' + fa(MIN_PASSWORD) + ' کاراکتر، حرف و عدد)']), newPass]),
+            el('label', { 'class': 'field' }, [el('span', null, ['تکرار رمز عبور جدید']), newPass2]),
+            el('label', { 'class': 'field' }, [el('span', null, ['کلید GitHub جدید (اختیاری — وقتی کلید قبلی منقضی می‌شود)']), newKey]),
+            el('div', { 'class': 'form__actions' }, [btn])
+        ]);
+        return el('section', { 'class': 'card account' }, [
+            el('h2', null, ['حساب کاربری']),
+            el('p', { 'class': 'muted' }, ['تغییر نام کاربری، رمز عبور یا کلید GitHub.']),
+            msg,
+            form,
+            keyHelp()
+        ]);
+    }
+
     /* ---------- Save to GitHub ---------- */
     function validate() {
         var bad = null;
@@ -506,6 +688,5 @@
     });
 
     /* ---------- Start ---------- */
-    token = readToken();
-    if (token) load(); else renderLogin();
+    start();
 })();
