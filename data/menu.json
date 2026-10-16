@@ -1,834 +1,844 @@
 {
-    "categories": [
+  "categories": [
+    {
+      "id": "c1",
+      "icon": "sandwich",
+      "title": {
+        "fa": "ساندویچ و اسنک",
+        "en": "Sandwiches & Snacks"
+      },
+      "note": {
+        "fa": "",
+        "en": ""
+      },
+      "visible": true,
+      "items": [
         {
-            "id": "c1",
-            "icon": "sandwich",
-            "title": {
-                "fa": "ساندویچ و اسنک",
-                "en": "Sandwiches & Snacks"
-            },
-            "note": {
-                "fa": "",
-                "en": ""
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i1",
-                    "name": {
-                        "fa": "اسنک",
-                        "en": "Snack"
-                    },
-                    "price": 280,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i2",
-                    "name": {
-                        "fa": "چیپس، قارچ و پنیر (کوچک)",
-                        "en": "Chips, Mushroom & Cheese (Small)"
-                    },
-                    "price": 320,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i3",
-                    "name": {
-                        "fa": "چیپس، قارچ و پنیر (بزرگ)",
-                        "en": "Chips, Mushroom & Cheese (Large)"
-                    },
-                    "price": 500,
-                    "available": true,
-                    "addon": false
-                }
-            ]
+          "id": "i1",
+          "name": {
+            "fa": "اسنک",
+            "en": "Snack"
+          },
+          "price": 280,
+          "available": true,
+          "addon": false
         },
         {
-            "id": "c2",
-            "icon": "leaf",
-            "title": {
-                "fa": "چای و دمنوش",
-                "en": "Herbal Teas"
-            },
-            "note": {
-                "fa": "",
-                "en": ""
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i4",
-                    "name": {
-                        "fa": "چای و نبات",
-                        "en": "Tea with Rock Candy"
-                    },
-                    "price": 80,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i5",
-                    "name": {
-                        "fa": "چای هل و دارچین",
-                        "en": "Tea (Cardamom + Cinnamon)"
-                    },
-                    "price": 130,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i6",
-                    "name": {
-                        "fa": "گل گاوزبان",
-                        "en": "Borage Tea"
-                    },
-                    "price": 140,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i7",
-                    "name": {
-                        "fa": "دمنوش آرامش",
-                        "en": "Tranquility (Relaxation Blend)"
-                    },
-                    "price": 150,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i8",
-                    "name": {
-                        "fa": "دمنوش آویشن",
-                        "en": "Thyme Tea"
-                    },
-                    "price": 130,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i9",
-                    "name": {
-                        "fa": "دمنوش شاه‌اسپرم",
-                        "en": "Shahsparan (Basil) Tea"
-                    },
-                    "price": 130,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i10",
-                    "name": {
-                        "fa": "چای ترش",
-                        "en": "Sour Tea (Hibiscus)"
-                    },
-                    "price": 130,
-                    "available": true,
-                    "addon": false
-                }
-            ]
+          "id": "i2",
+          "name": {
+            "fa": "چیپس، قارچ و پنیر (کوچک)",
+            "en": "Chips, Mushroom & Cheese (Small)"
+          },
+          "price": 320,
+          "available": true,
+          "addon": false
         },
         {
-            "id": "c3",
-            "icon": "cup",
-            "title": {
-                "fa": "نوشیدنی گرم بر پایه اسپرسو",
-                "en": "Hot Espresso-Based Drinks"
-            },
-            "note": {
-                "fa": "",
-                "en": ""
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i11",
-                    "name": {
-                        "fa": "اسپرسو",
-                        "en": "Espresso"
-                    },
-                    "price": 140,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i12",
-                    "name": {
-                        "fa": "عربیکا",
-                        "en": "Arabica"
-                    },
-                    "price": 180,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i13",
-                    "name": {
-                        "fa": "آمریکانو",
-                        "en": "Americano"
-                    },
-                    "price": 150,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i14",
-                    "name": {
-                        "fa": "کورتادو",
-                        "en": "Cortado"
-                    },
-                    "price": 170,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i15",
-                    "name": {
-                        "fa": "لاته",
-                        "en": "Latte"
-                    },
-                    "price": 200,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i16",
-                    "name": {
-                        "fa": "موکا",
-                        "en": "Mocha"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i17",
-                    "name": {
-                        "fa": "کاپوچینو",
-                        "en": "Cappuccino"
-                    },
-                    "price": 180,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i18",
-                    "name": {
-                        "fa": "آفوگاتو",
-                        "en": "Affogato"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i19",
-                    "name": {
-                        "fa": "کارامل ماکیاتو",
-                        "en": "Caramel Macchiato"
-                    },
-                    "price": 230,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i20",
-                    "name": {
-                        "fa": "سیروپ (افزودنی)",
-                        "en": "Syrup (Add-on)"
-                    },
-                    "price": 30,
-                    "available": true,
-                    "addon": true
-                }
-            ]
-        },
-        {
-            "id": "c4",
-            "icon": "ice",
-            "title": {
-                "fa": "نوشیدنی سرد بر پایه اسپرسو",
-                "en": "Cold Espresso-Based Drinks"
-            },
-            "note": {
-                "fa": "",
-                "en": ""
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i21",
-                    "name": {
-                        "fa": "آیس آمریکانو",
-                        "en": "Iced Americano"
-                    },
-                    "price": 160,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i22",
-                    "name": {
-                        "fa": "آیس لاته",
-                        "en": "Iced Latte"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i23",
-                    "name": {
-                        "fa": "آیس کارامل ماکیاتو",
-                        "en": "Iced Caramel Macchiato"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i24",
-                    "name": {
-                        "fa": "آیس موکا",
-                        "en": "Iced Mocha"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i25",
-                    "name": {
-                        "fa": "آیس چاکلت",
-                        "en": "Iced Chocolate"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i26",
-                    "name": {
-                        "fa": "آیس وایت چاکلت",
-                        "en": "Iced White Chocolate"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i27",
-                    "name": {
-                        "fa": "آیس پینک چاکلت",
-                        "en": "Iced Pink Chocolate"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i28",
-                    "name": {
-                        "fa": "آیس ماچا لاته",
-                        "en": "Iced Matcha Latte"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i29",
-                    "name": {
-                        "fa": "اورنج آمریکانو",
-                        "en": "Orange Americano"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i30",
-                    "name": {
-                        "fa": "سیروپ (افزودنی)",
-                        "en": "Syrup (Add-on)"
-                    },
-                    "price": 30,
-                    "available": true,
-                    "addon": true
-                }
-            ]
-        },
-        {
-            "id": "c5",
-            "icon": "mug",
-            "title": {
-                "fa": "نوشیدنی‌های گرم بین‌المللی",
-                "en": "Hot International Drinks"
-            },
-            "note": {
-                "fa": "",
-                "en": ""
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i31",
-                    "name": {
-                        "fa": "هات چاکلت",
-                        "en": "Hot Chocolate"
-                    },
-                    "price": 200,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i32",
-                    "name": {
-                        "fa": "وایت چاکلت",
-                        "en": "White Chocolate"
-                    },
-                    "price": 200,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i33",
-                    "name": {
-                        "fa": "پینک چاکلت",
-                        "en": "Pink Chocolate"
-                    },
-                    "price": 200,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i34",
-                    "name": {
-                        "fa": "دارک چاکلت",
-                        "en": "Dark Chocolate"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i35",
-                    "name": {
-                        "fa": "ماسالا چای",
-                        "en": "Masala Chai"
-                    },
-                    "price": 200,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i36",
-                    "name": {
-                        "fa": "چای لاته",
-                        "en": "Chai Latte"
-                    },
-                    "price": 190,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i37",
-                    "name": {
-                        "fa": "چای کرک",
-                        "en": "Karak Chai"
-                    },
-                    "price": 190,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i38",
-                    "name": {
-                        "fa": "ماچا لاته",
-                        "en": "Matcha Latte"
-                    },
-                    "price": 230,
-                    "available": true,
-                    "addon": false
-                }
-            ]
-        },
-        {
-            "id": "c6",
-            "icon": "drip",
-            "title": {
-                "fa": "قهوه دمی",
-                "en": "Brewed Coffees"
-            },
-            "note": {
-                "fa": "",
-                "en": ""
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i39",
-                    "name": {
-                        "fa": "قهوه ترک / قهوه سفید",
-                        "en": "Turkish / White Coffee"
-                    },
-                    "price": 140,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i40",
-                    "name": {
-                        "fa": "وی‌شصت (V60)",
-                        "en": "V60"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i41",
-                    "name": {
-                        "fa": "کلد برو",
-                        "en": "Cold Brew"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                }
-            ]
-        },
-        {
-            "id": "c7",
-            "icon": "smoothie",
-            "title": {
-                "fa": "اسموتی",
-                "en": "Smoothies"
-            },
-            "note": {
-                "fa": "",
-                "en": ""
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i42",
-                    "name": {
-                        "fa": "مانگو دریم",
-                        "en": "Mango Dream"
-                    },
-                    "price": 280,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i43",
-                    "name": {
-                        "fa": "سیتروس اسپلش",
-                        "en": "Citrus Splash"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i44",
-                    "name": {
-                        "fa": "سان‌ست وایب",
-                        "en": "Sunset Vibe"
-                    },
-                    "price": 300,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i45",
-                    "name": {
-                        "fa": "چری راش",
-                        "en": "Cherry Rush"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                }
-            ]
-        },
-        {
-            "id": "c8",
-            "icon": "cake",
-            "title": {
-                "fa": "کیک و دسر",
-                "en": "Cakes"
-            },
-            "note": {
-                "fa": "قیمت روز",
-                "en": "Daily price"
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i46",
-                    "name": {
-                        "fa": "کیک روز",
-                        "en": "Cake of the Day"
-                    },
-                    "price": null,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i47",
-                    "name": {
-                        "fa": "تیرامیسو",
-                        "en": "Tiramisu"
-                    },
-                    "price": null,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i48",
-                    "name": {
-                        "fa": "باقلوا",
-                        "en": "Baklava"
-                    },
-                    "price": null,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i49",
-                    "name": {
-                        "fa": "چیزکیک لوتوس",
-                        "en": "Lotus Cheesecake"
-                    },
-                    "price": null,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i68",
-                    "name": {
-                        "fa": "کیک سه شیر",
-                        "en": "Tres Leches Cake"
-                    },
-                    "price": null,
-                    "available": true,
-                    "addon": false
-                }
-            ]
-        },
-        {
-            "id": "c9",
-            "icon": "glass",
-            "title": {
-                "fa": "ماکتیل",
-                "en": "Mocktails"
-            },
-            "note": {
-                "fa": "",
-                "en": ""
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i50",
-                    "name": {
-                        "fa": "موهیتو",
-                        "en": "Mojito"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i51",
-                    "name": {
-                        "fa": "رد موهیتو",
-                        "en": "Red Mojito"
-                    },
-                    "price": 240,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i52",
-                    "name": {
-                        "fa": "بلو موهیتو",
-                        "en": "Blue Mojito"
-                    },
-                    "price": 240,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i53",
-                    "name": {
-                        "fa": "لیموناد",
-                        "en": "Lemonade"
-                    },
-                    "price": 200,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i54",
-                    "name": {
-                        "fa": "بابل‌گام",
-                        "en": "Bubblegum"
-                    },
-                    "price": 230,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i55",
-                    "name": {
-                        "fa": "بلاد",
-                        "en": "Blood"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i56",
-                    "name": {
-                        "fa": "گروت",
-                        "en": "Groot"
-                    },
-                    "price": 210,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i57",
-                    "name": {
-                        "fa": "وایلد وست",
-                        "en": "Wild West"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i58",
-                    "name": {
-                        "fa": "پاستیل",
-                        "en": "Pastille (Gummy)"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i69",
-                    "name": {
-                        "fa": "هاوایی",
-                        "en": "Hawaii"
-                    },
-                    "price": 270,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i70",
-                    "name": {
-                        "fa": "کهکشان آبی",
-                        "en": "Blue Galaxy"
-                    },
-                    "price": 270,
-                    "available": true,
-                    "addon": false
-                }
-            ]
-        },
-        {
-            "id": "c10",
-            "icon": "shake",
-            "title": {
-                "fa": "شیک",
-                "en": "Shakes"
-            },
-            "note": {
-                "fa": "",
-                "en": ""
-            },
-            "visible": true,
-            "items": [
-                {
-                    "id": "i60",
-                    "name": {
-                        "fa": "اسپرسو شیک",
-                        "en": "Espresso Shake"
-                    },
-                    "price": 320,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i61",
-                    "name": {
-                        "fa": "وانیل",
-                        "en": "Vanilla"
-                    },
-                    "price": 220,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i62",
-                    "name": {
-                        "fa": "توت‌فرنگی",
-                        "en": "Strawberry"
-                    },
-                    "price": 240,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i63",
-                    "name": {
-                        "fa": "شکلات",
-                        "en": "Chocolate"
-                    },
-                    "price": 250,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i64",
-                    "name": {
-                        "fa": "نوتلا",
-                        "en": "Nutella"
-                    },
-                    "price": 260,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i66",
-                    "name": {
-                        "fa": "بادام‌زمینی",
-                        "en": "Peanut"
-                    },
-                    "price": 300,
-                    "available": true,
-                    "addon": false
-                },
-                {
-                    "id": "i67",
-                    "name": {
-                        "fa": "پروتئین رژیمی",
-                        "en": "Diet Protein"
-                    },
-                    "price": 350,
-                    "available": true,
-                    "addon": false
-                }
-            ]
+          "id": "i3",
+          "name": {
+            "fa": "چیپس، قارچ و پنیر (بزرگ)",
+            "en": "Chips, Mushroom & Cheese (Large)"
+          },
+          "price": 500,
+          "available": true,
+          "addon": false
         }
-    ]
+      ]
+    },
+    {
+      "id": "c2",
+      "icon": "leaf",
+      "title": {
+        "fa": "چای و دمنوش",
+        "en": "Herbal Teas"
+      },
+      "note": {
+        "fa": "",
+        "en": ""
+      },
+      "visible": true,
+      "items": [
+        {
+          "id": "i4",
+          "name": {
+            "fa": "چای و نبات",
+            "en": "Tea with Rock Candy"
+          },
+          "price": 80,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i5",
+          "name": {
+            "fa": "چای هل و دارچین",
+            "en": "Tea (Cardamom + Cinnamon)"
+          },
+          "price": 130,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i6",
+          "name": {
+            "fa": "گل گاوزبان",
+            "en": "Borage Tea"
+          },
+          "price": 140,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i7",
+          "name": {
+            "fa": "دمنوش آرامش",
+            "en": "Tranquility (Relaxation Blend)"
+          },
+          "price": 150,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i8",
+          "name": {
+            "fa": "دمنوش آویشن",
+            "en": "Thyme Tea"
+          },
+          "price": 130,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i9",
+          "name": {
+            "fa": "دمنوش شاه‌اسپرم",
+            "en": "Shahsparan (Basil) Tea"
+          },
+          "price": 130,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i10",
+          "name": {
+            "fa": "چای ترش",
+            "en": "Sour Tea (Hibiscus)"
+          },
+          "price": 130,
+          "available": true,
+          "addon": false
+        }
+      ]
+    },
+    {
+      "id": "c3",
+      "icon": "cup",
+      "title": {
+        "fa": "نوشیدنی گرم بر پایه اسپرسو",
+        "en": "Hot Espresso-Based Drinks"
+      },
+      "note": {
+        "fa": "",
+        "en": ""
+      },
+      "visible": true,
+      "items": [
+        {
+          "id": "i11",
+          "name": {
+            "fa": "اسپرسو",
+            "en": "Espresso"
+          },
+          "price": 140,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i12",
+          "name": {
+            "fa": "عربیکا",
+            "en": "Arabica"
+          },
+          "price": 180,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i13",
+          "name": {
+            "fa": "آمریکانو",
+            "en": "Americano"
+          },
+          "price": 150,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i14",
+          "name": {
+            "fa": "کورتادو",
+            "en": "Cortado"
+          },
+          "price": 170,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i15",
+          "name": {
+            "fa": "لاته",
+            "en": "Latte"
+          },
+          "price": 200,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i16",
+          "name": {
+            "fa": "موکا",
+            "en": "Mocha"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i17",
+          "name": {
+            "fa": "کاپوچینو",
+            "en": "Cappuccino"
+          },
+          "price": 180,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i18",
+          "name": {
+            "fa": "آفوگاتو",
+            "en": "Affogato"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i19",
+          "name": {
+            "fa": "کارامل ماکیاتو",
+            "en": "Caramel Macchiato"
+          },
+          "price": 230,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i20",
+          "name": {
+            "fa": "سیروپ (افزودنی)",
+            "en": "Syrup (Add-on)"
+          },
+          "price": 30,
+          "available": true,
+          "addon": true
+        }
+      ]
+    },
+    {
+      "id": "c4",
+      "icon": "ice",
+      "title": {
+        "fa": "نوشیدنی سرد بر پایه اسپرسو",
+        "en": "Cold Espresso-Based Drinks"
+      },
+      "note": {
+        "fa": "",
+        "en": ""
+      },
+      "visible": true,
+      "items": [
+        {
+          "id": "i21",
+          "name": {
+            "fa": "آیس آمریکانو",
+            "en": "Iced Americano"
+          },
+          "price": 160,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i22",
+          "name": {
+            "fa": "آیس لاته",
+            "en": "Iced Latte"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i23",
+          "name": {
+            "fa": "آیس کارامل ماکیاتو",
+            "en": "Iced Caramel Macchiato"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i24",
+          "name": {
+            "fa": "آیس موکا",
+            "en": "Iced Mocha"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i25",
+          "name": {
+            "fa": "آیس چاکلت",
+            "en": "Iced Chocolate"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i26",
+          "name": {
+            "fa": "آیس وایت چاکلت",
+            "en": "Iced White Chocolate"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i27",
+          "name": {
+            "fa": "آیس پینک چاکلت",
+            "en": "Iced Pink Chocolate"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i28",
+          "name": {
+            "fa": "آیس ماچا لاته",
+            "en": "Iced Matcha Latte"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i29",
+          "name": {
+            "fa": "اورنج آمریکانو",
+            "en": "Orange Americano"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i30",
+          "name": {
+            "fa": "سیروپ (افزودنی)",
+            "en": "Syrup (Add-on)"
+          },
+          "price": 30,
+          "available": true,
+          "addon": true
+        }
+      ]
+    },
+    {
+      "id": "c5",
+      "icon": "mug",
+      "title": {
+        "fa": "نوشیدنی‌های گرم بین‌المللی",
+        "en": "Hot International Drinks"
+      },
+      "note": {
+        "fa": "",
+        "en": ""
+      },
+      "visible": true,
+      "items": [
+        {
+          "id": "i31",
+          "name": {
+            "fa": "هات چاکلت",
+            "en": "Hot Chocolate"
+          },
+          "price": 200,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i32",
+          "name": {
+            "fa": "وایت چاکلت",
+            "en": "White Chocolate"
+          },
+          "price": 200,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i33",
+          "name": {
+            "fa": "پینک چاکلت",
+            "en": "Pink Chocolate"
+          },
+          "price": 200,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i34",
+          "name": {
+            "fa": "دارک چاکلت",
+            "en": "Dark Chocolate"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i35",
+          "name": {
+            "fa": "ماسالا چای",
+            "en": "Masala Chai"
+          },
+          "price": 200,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i36",
+          "name": {
+            "fa": "چای لاته",
+            "en": "Chai Latte"
+          },
+          "price": 190,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i37",
+          "name": {
+            "fa": "چای کرک",
+            "en": "Karak Chai"
+          },
+          "price": 190,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i38",
+          "name": {
+            "fa": "ماچا لاته",
+            "en": "Matcha Latte"
+          },
+          "price": 230,
+          "available": true,
+          "addon": false
+        }
+      ]
+    },
+    {
+      "id": "c6",
+      "icon": "drip",
+      "title": {
+        "fa": "قهوه دمی",
+        "en": "Brewed Coffees"
+      },
+      "note": {
+        "fa": "",
+        "en": ""
+      },
+      "visible": true,
+      "items": [
+        {
+          "id": "i39",
+          "name": {
+            "fa": "قهوه ترک / قهوه سفید",
+            "en": "Turkish / White Coffee"
+          },
+          "price": 140,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i40",
+          "name": {
+            "fa": "وی‌شصت (V60)",
+            "en": "V60"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i41",
+          "name": {
+            "fa": "کلد برو",
+            "en": "Cold Brew"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        }
+      ]
+    },
+    {
+      "id": "c7",
+      "icon": "smoothie",
+      "title": {
+        "fa": "اسموتی",
+        "en": "Smoothies"
+      },
+      "note": {
+        "fa": "",
+        "en": ""
+      },
+      "visible": true,
+      "items": [
+        {
+          "id": "i42",
+          "name": {
+            "fa": "مانگو دریم",
+            "en": "Mango Dream"
+          },
+          "price": 280,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i43",
+          "name": {
+            "fa": "سیتروس اسپلش",
+            "en": "Citrus Splash"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i44",
+          "name": {
+            "fa": "سان‌ست وایب",
+            "en": "Sunset Vibe"
+          },
+          "price": 300,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i45",
+          "name": {
+            "fa": "چری راش",
+            "en": "Cherry Rush"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        }
+      ]
+    },
+    {
+      "id": "c8",
+      "icon": "cake",
+      "title": {
+        "fa": "کیک و دسر",
+        "en": "Cakes"
+      },
+      "note": {
+        "fa": "قیمت روز",
+        "en": "Daily price"
+      },
+      "visible": true,
+      "items": [
+        {
+          "id": "i46",
+          "name": {
+            "fa": "کیک روز",
+            "en": "Cake of the Day"
+          },
+          "price": null,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i47",
+          "name": {
+            "fa": "تیرامیسو",
+            "en": "Tiramisu"
+          },
+          "price": null,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i48",
+          "name": {
+            "fa": "باقلوا",
+            "en": "Baklava"
+          },
+          "price": null,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i49",
+          "name": {
+            "fa": "چیزکیک لوتوس",
+            "en": "Lotus Cheesecake"
+          },
+          "price": null,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i68",
+          "name": {
+            "fa": "کیک سه شیر",
+            "en": "Tres Leches Cake"
+          },
+          "price": null,
+          "available": true,
+          "addon": false
+        }
+      ]
+    },
+    {
+      "id": "c9",
+      "icon": "glass",
+      "title": {
+        "fa": "ماکتیل",
+        "en": "Mocktails"
+      },
+      "note": {
+        "fa": "",
+        "en": ""
+      },
+      "visible": true,
+      "items": [
+        {
+          "id": "i50",
+          "name": {
+            "fa": "موهیتو",
+            "en": "Mojito"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i51",
+          "name": {
+            "fa": "رد موهیتو",
+            "en": "Red Mojito"
+          },
+          "price": 240,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i52",
+          "name": {
+            "fa": "بلو موهیتو",
+            "en": "Blue Mojito"
+          },
+          "price": 240,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i53",
+          "name": {
+            "fa": "لیموناد",
+            "en": "Lemonade"
+          },
+          "price": 200,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i54",
+          "name": {
+            "fa": "بابل‌گام",
+            "en": "Bubblegum"
+          },
+          "price": 230,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i55",
+          "name": {
+            "fa": "بلاد",
+            "en": "Blood"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i56",
+          "name": {
+            "fa": "گروت",
+            "en": "Groot"
+          },
+          "price": 210,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i57",
+          "name": {
+            "fa": "وایلد وست",
+            "en": "Wild West"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i58",
+          "name": {
+            "fa": "پاستیل",
+            "en": "Pastille (Gummy)"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i69",
+          "name": {
+            "fa": "هاوایی",
+            "en": "Hawaii"
+          },
+          "price": 270,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i70",
+          "name": {
+            "fa": "کهکشان آبی",
+            "en": "Blue Galaxy"
+          },
+          "price": 270,
+          "available": true,
+          "addon": false
+        }
+      ]
+    },
+    {
+      "id": "c10",
+      "icon": "shake",
+      "title": {
+        "fa": "شیک",
+        "en": "Shakes"
+      },
+      "note": {
+        "fa": "",
+        "en": ""
+      },
+      "visible": true,
+      "items": [
+        {
+          "id": "i60",
+          "name": {
+            "fa": "اسپرسو شیک",
+            "en": "Espresso Shake"
+          },
+          "price": 320,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i61",
+          "name": {
+            "fa": "وانیل",
+            "en": "Vanilla"
+          },
+          "price": 220,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i62",
+          "name": {
+            "fa": "توت‌فرنگی",
+            "en": "Strawberry"
+          },
+          "price": 240,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i63",
+          "name": {
+            "fa": "شکلات",
+            "en": "Chocolate"
+          },
+          "price": 250,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i64",
+          "name": {
+            "fa": "نوتلا",
+            "en": "Nutella"
+          },
+          "price": 260,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i66",
+          "name": {
+            "fa": "بادام‌زمینی",
+            "en": "Peanut"
+          },
+          "price": 300,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i67",
+          "name": {
+            "fa": "پروتئین رژیمی",
+            "en": "Diet Protein"
+          },
+          "price": 350,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "i-choco-banana",
+          "name": {
+            "fa": "شکلات موز",
+            "en": "Chocolate Banana"
+          },
+          "price": 270,
+          "available": true,
+          "addon": false
+        }
+      ]
+    }
+  ]
 }
