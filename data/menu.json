@@ -831,8 +831,8 @@
         {
           "id": "i-choco-banana",
           "name": {
-            "fa": "شکلات موز",
-            "en": "Chocolate Banana"
+            "fa": "موز شکلات",
+            "en": "Banana Chocolate"
           },
           "price": 270,
           "available": true,
