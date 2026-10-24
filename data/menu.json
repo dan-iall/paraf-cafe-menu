@@ -834,7 +834,17 @@
             "fa": "موز شکلات",
             "en": "Banana Chocolate"
           },
-          "price": 270,
+          "price": 280,
+          "available": true,
+          "addon": false
+        },
+        {
+          "id": "imvmmzxshqvg",
+          "name": {
+            "fa": "کارامل",
+            "en": "Caramel"
+          },
+          "price": 240,
           "available": true,
           "addon": false
         }
