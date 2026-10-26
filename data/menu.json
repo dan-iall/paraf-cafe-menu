@@ -41,7 +41,8 @@
           },
           "price": 500,
           "available": true,
-          "addon": false
+          "addon": false,
+          "badge": "popular"
         }
       ]
     },
@@ -96,7 +97,8 @@
           },
           "price": 150,
           "available": true,
-          "addon": false
+          "addon": false,
+          "badge": "barista"
         },
         {
           "id": "i8",
@@ -181,7 +183,8 @@
           },
           "price": 170,
           "available": true,
-          "addon": false
+          "addon": false,
+          "badge": "barista"
         },
         {
           "id": "i15",
@@ -191,7 +194,8 @@
           },
           "price": 200,
           "available": true,
-          "addon": false
+          "addon": false,
+          "badge": "popular"
         },
         {
           "id": "i16",
@@ -336,7 +340,8 @@
           },
           "price": 250,
           "available": true,
-          "addon": false
+          "addon": false,
+          "badge": "barista"
         },
         {
           "id": "i29",
@@ -836,7 +841,8 @@
           },
           "price": 280,
           "available": true,
-          "addon": false
+          "addon": false,
+          "badge": "popular"
         },
         {
           "id": "imvmmzxshqvg",

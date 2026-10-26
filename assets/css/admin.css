@@ -253,25 +253,32 @@ input[type="checkbox"] { width: 18px; height: 18px; min-height: 0; accent-color:
 
 .items-head, .item-row {
     display: grid; gap: 8px; align-items: center;
-    grid-template-columns: minmax(140px, 1.3fr) minmax(140px, 1.3fr) 110px auto auto;
+    grid-template-columns: minmax(130px, 1.2fr) minmax(130px, 1.2fr) 95px 135px auto auto;
 }
 .items-head { padding: 12px 6px 6px; font-size: .78rem; color: var(--muted); font-weight: 600; }
 .item-row { padding: 6px; border-radius: 12px; margin: 0; scroll-margin-top: 90px; }
 .item-row:hover { background: var(--surface-2); }
 .item-row:target { background: rgba(192, 138, 91, .15); }
-.item-row input:not([type="checkbox"]) { min-height: 38px; padding: 6px 10px; }
+.item-row input:not([type="checkbox"]), .item-row select { min-height: 38px; padding: 6px 10px; border-radius: 10px; }
 .item-row--off input:not([type="checkbox"]) { text-decoration: line-through; opacity: .6; }
+.badge-select {
+    border: 1px solid var(--line); background: var(--surface); color: var(--text);
+    font: inherit; font-size: .84rem; font-weight: 600; cursor: pointer; outline: 0;
+    transition: border-color .15s;
+}
+.badge-select:focus { border-color: var(--caramel); }
 .item-row__flags { display: flex; gap: 10px; }
 .item-row__actions { display: flex; gap: 4px; justify-content: flex-end; }
 .item-row--new { margin-top: 8px; border: 1px dashed var(--caramel); background: transparent; }
 .price-input { text-align: center; }
 
-@media (max-width: 760px) {
+@media (max-width: 860px) {
     .items-head { display: none; }
     .item-row { grid-template-columns: 1fr 1fr; padding: 12px 8px; border-bottom: 1px solid var(--line); border-radius: 0; }
     .item-row .price-input { grid-column: 1; }
-    .item-row__flags { grid-column: 2; justify-content: flex-start; }
-    .item-row__actions { grid-column: 1 / -1; justify-content: flex-start; }
+    .item-row .badge-select { grid-column: 2; }
+    .item-row__flags { grid-column: 1; justify-content: flex-start; }
+    .item-row__actions { grid-column: 2; justify-content: flex-end; }
 }
 
 /* ---------- Auth ---------- */

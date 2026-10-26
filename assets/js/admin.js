@@ -29,6 +29,13 @@
         sandwich: 'ساندویچ', leaf: 'دمنوش', cup: 'فنجان', ice: 'نوشیدنی سرد', mug: 'ماگ',
         drip: 'قهوه دمی', smoothie: 'اسموتی', cake: 'کیک', glass: 'ماکتیل', shake: 'شیک'
     };
+    var BADGE_LABELS = {
+        '': '— بدون نشان —',
+        'barista': '✨ پیشنهاد باریستا',
+        'popular': '⭐ محبوب‌ترین',
+        'new': '🟢 جدید',
+        'special': '🟣 ویژه'
+    };
     var COLOR_FIELDS = [
         ['primary', 'رنگ اصلی', 'دکمه‌ها، آیکون دسته‌ها، تب انتخاب‌شده'],
         ['dark', 'رنگ تیره', 'نوار بالا، سربرگ منو، صفحه شروع'],
@@ -126,76 +133,81 @@
     var root = document.getElementById('app');
     function show(nodes) { root.replaceChildren.apply(root, [].concat(nodes)); }
 
-    /* ---------- Username + password ----------
-     * GitHub only accepts saves made with a GitHub key. The key is stored in data/auth.json,
-     * LOCKED (AES-256-GCM) with a key derived from username + password (PBKDF2-SHA256, 600,000 rounds).
-     * That file is public, so the password is the only protection: strong passwords are required.
-     */
-    var AUTH_FILE = 'data/auth.json';
-    var PBKDF2_ROUNDS = 600000;
-    var MIN_PASSWORD = 10;
-    var authCfg = null;          // contents of data/auth.json; null = not set up yet
-    var notice = null;           // message to show once the editor opens
+    /* ---------- Single Password Authentication ---------- */
+    var DEFAULT_PASS = 'paraf2026';
+    var PASS_KEY = 'paraph_admin_pass';
+    var AUTH_KEY = 'paraph_admin_authed';
+    var notice = null;
 
-    function bytesToB64(bytes) { var s = ''; for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); }
-    function b64ToBytes(str) { var bin = atob(str), out = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out; }
+    function getAdminPass() {
+        try { return localStorage.getItem(PASS_KEY) || DEFAULT_PASS; } catch (e) { return DEFAULT_PASS; }
+    }
+    function setAdminPass(p) {
+        try { localStorage.setItem(PASS_KEY, p); return true; } catch (e) { return false; }
+    }
+    function isAuthed() {
+        try { return sessionStorage.getItem(AUTH_KEY) === '1' || localStorage.getItem(AUTH_KEY) === '1'; } catch (e) { return false; }
+    }
+    function setAuthed(remember) {
+        try {
+            sessionStorage.setItem(AUTH_KEY, '1');
+            if (remember) localStorage.setItem(AUTH_KEY, '1'); else localStorage.removeItem(AUTH_KEY);
+        } catch (e) {}
+    }
+    function clearAuthed() {
+        try { sessionStorage.removeItem(AUTH_KEY); localStorage.removeItem(AUTH_KEY); } catch (e) {}
+    }
 
-    function deriveKey(user, pass, salt, rounds) {
-        var secret = new TextEncoder().encode(user.trim().toLowerCase() + '\n' + pass);
-        return crypto.subtle.importKey('raw', secret, 'PBKDF2', false, ['deriveKey']).then(function (base) {
-            return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: salt, iterations: rounds, hash: 'SHA-256' },
-                base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
-        });
+    /* ---------- JSON Import & Export Helpers ---------- */
+    function downloadJson(dataObj, filename) {
+        var blob = new Blob([JSON.stringify(dataObj, null, 2) + '\n'], { type: 'application/json;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+        setStatus('ok', 'فایل ' + filename + ' دانلود شد ✓');
     }
-    function lockKey(ghKey, user, pass) {
-        var salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
-        return deriveKey(user, pass, salt, PBKDF2_ROUNDS).then(function (k) {
-            return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, k, new TextEncoder().encode(ghKey));
-        }).then(function (ct) {
-            return { v: 1, kdf: 'PBKDF2-SHA256', rounds: PBKDF2_ROUNDS, cipher: 'AES-256-GCM',
-                     salt: bytesToB64(salt), iv: bytesToB64(iv), data: bytesToB64(new Uint8Array(ct)) };
-        });
-    }
-    /** Wrong username or password -> rejects with Error('bad'). */
-    function unlockKey(cfg, user, pass) {
-        return deriveKey(user, pass, b64ToBytes(cfg.salt), cfg.rounds || PBKDF2_ROUNDS).then(function (k) {
-            return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToBytes(cfg.iv) }, k, b64ToBytes(cfg.data));
-        }).then(function (pt) { return new TextDecoder().decode(pt); }, function () { throw new Error('bad'); });
-    }
-    function fetchAuth() {
-        return fetch('../' + AUTH_FILE + '?v=' + Date.now(), { cache: 'no-store' })
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (j) { return j && j.data && j.salt && j.iv ? j : null; })
-            .catch(function () { return null; });
-    }
-    /** Check that a GitHub key can access the repository; makes it the active key. */
-    function checkKey(t) {
-        token = t;
-        return api('').then(function (r) {
-            if (r.status === 401) throw new Error('کلید GitHub نامعتبر یا منقضی است.');
-            if (r.status === 404 || r.status === 403) throw new Error('این کلید GitHub به مخزن ' + OWNER + '/' + REPO + ' دسترسی ندارد.');
-            if (r.status !== 200) throw new Error('خطای GitHub (' + r.status + ').');
-        });
-    }
-    /** Save data/auth.json (needs a working key). */
-    function saveAuth(cfg) {
-        return api('/contents/' + AUTH_FILE + '?ref=' + BRANCH).then(function (r) {
-            var body = { message: 'Update admin login (online admin)', content: toB64(serialize(cfg)), branch: BRANCH };
-            if (r.status === 200) body.sha = r.json.sha;
-            return api('/contents/' + AUTH_FILE, 'PUT', body);
-        }).then(function (r) {
-            if (r.status === 200 || r.status === 201) { authCfg = cfg; return; }
-            if (r.status === 403 || r.status === 404) throw new Error('این کلید GitHub اجازه ذخیره ندارد (Contents باید «Read and write» باشد).');
-            throw new Error('ذخیره حساب انجام نشد (' + r.status + ').');
-        });
-    }
-    function credentialsError(user, pass, pass2) {
-        if (!/^[A-Za-z0-9_.-]{3,32}$/.test(user)) return 'نام کاربری باید ۳ تا ۳۲ حرف انگلیسی، عدد یا . _ - باشد.';
-        if (pass.length < MIN_PASSWORD) return 'رمز عبور باید حداقل ' + fa(MIN_PASSWORD) + ' کاراکتر باشد.';
-        if (!/[A-Za-z]/.test(pass) || !/[0-9]/.test(pass)) return 'رمز عبور باید هم حرف انگلیسی و هم عدد داشته باشد.';
-        if (pass.toLowerCase().indexOf(user.toLowerCase()) !== -1) return 'رمز عبور نباید شامل نام کاربری باشد.';
-        if (pass !== pass2) return 'تکرار رمز عبور یکسان نیست.';
-        return null;
+
+    function triggerImport() {
+        var inp = document.createElement('input');
+        inp.type = 'file';
+        inp.accept = '.json,application/json';
+        inp.style.display = 'none';
+        document.body.appendChild(inp);
+        inp.onchange = function (e) {
+            var file = e.target.files && e.target.files[0];
+            if (!file) { document.body.removeChild(inp); return; }
+            var reader = new FileReader();
+            reader.onload = function (ev) {
+                try {
+                    var parsed = JSON.parse(ev.target.result);
+                    if (parsed && Array.isArray(parsed.categories)) {
+                        data.menu = parsed;
+                        normalize();
+                        refreshSaveState();
+                        renderApp();
+                        setStatus('ok', 'منو از فایل «' + file.name + '» بارگذاری شد ✓ برای اعمال دکمه «ذخیره و انتشار» را بزنید.');
+                    } else if (parsed && (parsed.colors || parsed.name)) {
+                        data.site = parsed;
+                        normalize();
+                        refreshSaveState();
+                        renderApp();
+                        setStatus('ok', 'اطلاعات کافه از فایل «' + file.name + '» بارگذاری شد ✓');
+                    } else {
+                        setStatus('err', 'قالب فایل نامعتبر است (باید ساختار menu.json یا site.json باشد).');
+                    }
+                } catch (err) {
+                    setStatus('err', 'خطا در خواندن فایل JSON: ' + err.message);
+                }
+                document.body.removeChild(inp);
+            };
+            reader.readAsText(file);
+        };
+        inp.click();
     }
 
     function authPage(title, subtitle, error, content) {
@@ -205,128 +217,91 @@
                 el('h1', null, [title]),
                 el('p', { 'class': 'muted' }, [subtitle]),
                 error ? el('div', { 'class': 'alert alert--error' }, [error]) : null
-            ].concat(content, [el('a', { 'class': 'auth__back', href: '../' }, ['← بازگشت به منو'])]))
+            ].concat(content, [
+                el('div', { style: 'margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;' }, [
+                    el('a', { 'class': 'auth__back', href: '../menu-fa.html' }, ['مشاهده منو کافه']),
+                    el('a', { 'class': 'auth__back', href: '../counter.html' }, ['صندوق و فاکتور'])
+                ])
+            ]))
         ]));
     }
-    function keyHelp() {
-        return el('details', { 'class': 'help' }, [
-            el('summary', null, ['کلید GitHub را چطور بسازم؟']),
-            el('ol', null, [
-                el('li', null, ['وارد حساب GitHub شوید و این صفحه را باز کنید: ', el('a', { href: 'https://github.com/settings/personal-access-tokens/new', target: '_blank', rel: 'noopener', dir: 'ltr' }, ['github.com/settings/personal-access-tokens/new'])]),
-                el('li', null, ['Token name: یک نام دلخواه، مثلا Paraph menu — Expiration: مثلا ۹۰ روز']),
-                el('li', null, ['Repository access: گزینه Only select repositories و انتخاب ', el('b', { dir: 'ltr' }, [REPO])]),
-                el('li', null, ['Permissions → Repository permissions → Contents: ', el('b', null, ['Read and write'])]),
-                el('li', null, ['Generate token را بزنید و کلید (شروع با github_pat_) را اینجا وارد کنید.'])
-            ])
-        ]);
-    }
+
     function input(type, attrs) { return el('input', Object.assign({ type: type, dir: 'ltr', required: true }, attrs || {})); }
     function busyButton(btn, on, label) { btn.disabled = on; btn.textContent = label; }
 
-    /** Normal login: username + password. */
+    /** Single user password login */
     function renderLogin(error) {
-        var user = input('text', { autocomplete: 'username' });
-        var pass = input('password', { autocomplete: 'current-password' });
+        var pass = input('password', { autocomplete: 'current-password', placeholder: 'گذرواژه را وارد کنید' });
         var remember = el('input', { type: 'checkbox' });
-        var btn = el('button', { 'class': 'btn btn--primary btn--block', type: 'submit' }, ['ورود']);
+        var btn = el('button', { 'class': 'btn btn--primary btn--block', type: 'submit' }, ['ورود به پنل مدیریت']);
         var form = el('form', { 'class': 'form', onsubmit: function (e) {
             e.preventDefault();
             busyButton(btn, true, 'در حال بررسی…');
-            unlockKey(authCfg, user.value, pass.value).then(function (key) {
-                return checkKey(key).then(function () { storeToken(key, remember.checked); return load(); }, function (err) {
-                    throw new Error(/منقضی/.test(err.message)
-                        ? 'کلید GitHub این حساب منقضی شده است. با «تنظیم دوباره» یک کلید جدید وارد کنید.' : err.message);
-                });
-            }).catch(function (err) {
-                token = null;
-                renderLogin(err.message === 'bad' ? 'نام کاربری یا رمز عبور اشتباه است.' : (err.message || 'اتصال به GitHub برقرار نشد.'));
-            });
+            var entered = pass.value.trim();
+            if (entered === getAdminPass()) {
+                setAuthed(remember.checked);
+                load();
+            } else {
+                renderLogin('گذرواژه وارد شده نادرست است.');
+            }
         } }, [
-            el('label', { 'class': 'field' }, [el('span', null, ['نام کاربری']), user]),
-            el('label', { 'class': 'field' }, [el('span', null, ['رمز عبور']), pass]),
+            el('label', { 'class': 'field' }, [el('span', null, ['گذرواژه مدیریت']), pass]),
             el('label', { 'class': 'check' }, [remember, ' مرا به خاطر بسپار (فقط روی دستگاه شخصی)']),
             btn
         ]);
-        authPage('پنل مدیریت آنلاین منو', 'ورود با نام کاربری و رمز عبور', error, [
+        authPage('پنل مدیریت کافه پاراف', 'ورود با گذرواژه مدیریت', error, [
             form,
-            el('p', { 'class': 'muted small', style: 'margin-top:14px' }, [
-                'رمز را فراموش کرده‌اید یا کلید GitHub منقضی شده؟ ',
-                el('a', { href: '#', onclick: function (e) { e.preventDefault(); renderSetup(); } }, ['تنظیم دوباره'])
+            el('p', { 'class': 'muted small', style: 'margin-top:14px;line-height:1.7' }, [
+                'گذرواژه پیش‌فرض: ', el('code', { dir: 'ltr', style: 'background:rgba(243,229,207,.15);padding:2px 8px;border-radius:6px;font-weight:700;' }, ['paraf2026']),
+                el('br'), 'قابل تغییر در تب «حساب» پس از ورود.'
             ])
         ]);
-        user.focus();
+        pass.focus();
     }
 
-    /** One-time setup (or reset): GitHub key once + choose username and password. */
-    function renderSetup(error) {
-        var key = input('password', { autocomplete: 'off', placeholder: 'github_pat_…' });
-        var user = input('text', { autocomplete: 'username' });
-        var pass = input('password', { autocomplete: 'new-password' });
-        var pass2 = input('password', { autocomplete: 'new-password' });
-        var btn = el('button', { 'class': 'btn btn--primary btn--block', type: 'submit' }, [authCfg ? 'ذخیره حساب جدید' : 'ساخت حساب']);
-        var form = el('form', { 'class': 'form', onsubmit: function (e) {
-            e.preventDefault();
-            var problem = credentialsError(user.value.trim(), pass.value, pass2.value);
-            if (problem) { renderSetup(problem); return; }
-            busyButton(btn, true, 'در حال ساخت حساب… (چند ثانیه)');
-            var k = key.value.trim();
-            checkKey(k).then(function () { return lockKey(k, user.value.trim(), pass.value); })
-                .then(saveAuth)
-                .then(function () {
-                    storeToken(k, false);
-                    notice = 'حساب ساخته شد ✓ از این به بعد با نام کاربری و رمز عبور وارد شوید (حدود ۱ دقیقه بعد فعال می‌شود).';
-                    return load();
-                }).catch(function (err) { token = null; renderSetup(err.message || 'اتصال به GitHub برقرار نشد.'); });
-        } }, [
-            el('label', { 'class': 'field' }, [el('span', null, ['کلید GitHub (فقط همین یک بار)']), key]),
-            el('label', { 'class': 'field' }, [el('span', null, ['نام کاربری دلخواه']), user]),
-            el('label', { 'class': 'field' }, [el('span', null, ['رمز عبور (حداقل ' + fa(MIN_PASSWORD) + ' کاراکتر، حرف و عدد)']), pass]),
-            el('label', { 'class': 'field' }, [el('span', null, ['تکرار رمز عبور']), pass2]),
-            btn
-        ]);
-        authPage(authCfg ? 'تنظیم دوباره حساب' : 'ساخت حساب مدیر',
-            authCfg ? 'نام کاربری و رمز قبلی با این حساب جایگزین می‌شود.' : 'یک بار کلید GitHub را وارد کنید و نام کاربری و رمز عبور بسازید.',
-            error, [
-                form,
-                el('p', { 'class': 'muted small', style: 'margin-top:12px' }, ['رمز عبور قوی انتخاب کنید: کلید GitHub با همین رمز قفل می‌شود.']),
-                keyHelp(),
-                authCfg ? el('p', { 'class': 'small', style: 'margin-top:12px' }, [el('a', { href: '#', onclick: function (e) { e.preventDefault(); renderLogin(); } }, ['← بازگشت به ورود'])]) : null
-            ]);
-        key.focus();
-    }
-
-    /** Show login (or first-time setup) depending on whether data/auth.json exists. */
     function start(message) {
-        token = readToken();
-        if (token && !message) { load(); return; }
-        fetchAuth().then(function (cfg) {
-            authCfg = cfg;
-            if (cfg) renderLogin(message); else renderSetup(message);
-        });
+        if (isAuthed() && !message) { load(); return; }
+        renderLogin(message);
     }
 
-    /* ---------- Load data from GitHub ---------- */
-    function loadFile(key) {
-        return api('/contents/' + FILES[key] + '?ref=' + BRANCH).then(function (r) {
-            if (r.status === 401) throw new Error('auth');
-            if (r.status !== 200) throw new Error('فایل ' + FILES[key] + ' خوانده نشد (' + r.status + ').');
-            sha[key] = r.json.sha;
-            data[key] = JSON.parse(fromB64(r.json.content));
-            saved[key] = serialize(data[key]);
-        });
+    /* ---------- Load Data (direct local fetch + optional GitHub sync) ---------- */
+    function loadFileLocal(key) {
+        return fetch('../' + FILES[key] + '?v=' + Date.now(), { cache: 'no-store' })
+            .then(function (r) {
+                if (!r.ok) throw new Error('فایل ' + FILES[key] + ' خوانده نشد (' + r.status + ').');
+                return r.json();
+            }).then(function (json) {
+                data[key] = json;
+                saved[key] = serialize(data[key]);
+            });
     }
+
+    function syncShaWithGithub(key) {
+        token = readToken();
+        if (!token) return Promise.resolve();
+        return api('/contents/' + FILES[key] + '?ref=' + BRANCH).then(function (r) {
+            if (r.status === 200 && r.json && r.json.sha) {
+                sha[key] = r.json.sha;
+            }
+        }).catch(function () {});
+    }
+
     function load() {
         show(el('p', { 'class': 'loading' }, ['در حال بارگذاری منو…']));
-        return Promise.all([loadFile('site'), loadFile('menu')]).then(function () {
+        return Promise.all([loadFileLocal('site'), loadFileLocal('menu')]).then(function () {
             normalize();
             saved.site = serialize(data.site);
             saved.menu = serialize(data.menu);
+            syncShaWithGithub('site');
+            syncShaWithGithub('menu');
             renderApp();
         }).catch(function (err) {
-            if (err.message === 'auth') { forgetToken(); start('نشست شما منقضی شده است. دوباره وارد شوید.'); return; }
             show(el('main', { 'class': 'auth' }, [el('div', { 'class': 'auth__box' }, [
                 el('div', { 'class': 'alert alert--error' }, [err.message]),
-                el('button', { 'class': 'btn', onclick: function () { load(); } }, ['تلاش دوباره'])
+                el('button', { 'class': 'btn', onclick: function () { load(); } }, ['تلاش دوباره']),
+                el('div', { style: 'margin-top:14px' }, [
+                    el('button', { 'class': 'btn btn--sm', onclick: function () { clearAuthed(); start(); } }, ['خروج و ورود مجدد'])
+                ])
             ])]));
         });
     }
@@ -348,6 +323,7 @@
                 it.price = (it.price === '' || it.price === undefined) ? null : it.price;
                 it.available = it.available !== false;
                 it.addon = !!it.addon;
+                it.badge = it.badge || '';
                 return it;
             });
             return c;
@@ -382,7 +358,10 @@
                     el('div', { 'class': 'gh-brand' }, [el('span', { 'class': 'mark' }, ['P']), el('div', null, [el('strong', null, [(data.site.name && data.site.name.fa) || 'پنل مدیریت']), el('small', null, ['پنل مدیریت آنلاین'])])]),
                     el('nav', { 'class': 'tabs' }, tabs),
                     el('div', { 'class': 'gh-actions' }, [
-                        el('a', { 'class': 'btn btn--sm', href: '../', target: '_blank' }, ['مشاهده منو']),
+                        el('a', { 'class': 'btn btn--sm', href: '../menu-fa.html', target: '_blank', title: 'مشاهده صفحه منو' }, ['منو']),
+                        el('a', { 'class': 'btn btn--sm', href: '../counter.html', target: '_blank', title: 'صورتحساب و صندوق' }, ['صندوق']),
+                        el('button', { 'class': 'btn btn--sm', type: 'button', title: 'بارگذاری فایل JSON منو یا سایت', onclick: triggerImport }, ['📥 بارگذاری']),
+                        el('button', { 'class': 'btn btn--sm', type: 'button', title: 'دانلود فایل منو به عنوان فایل json', onclick: function () { downloadJson(data.menu, 'menu.json'); } }, ['📤 خروجی']),
                         saveBtn,
                         el('button', { 'class': 'btn btn--sm', type: 'button', onclick: logout }, ['خروج'])
                     ])
@@ -397,6 +376,7 @@
 
     function logout() {
         if (anyDirty() && !confirm('تغییرات ذخیره نشده از بین می‌روند. خارج می‌شوید؟')) return;
+        clearAuthed();
         forgetToken();
         data = { site: null, menu: null };
         start();
@@ -435,10 +415,18 @@
                         refreshSaveState();
                     }
                 });
+                var badgeSel = el('select', {
+                    'class': 'badge-select',
+                    title: 'نشان ویژه آیتم',
+                    onchange: function (e) { it.badge = e.target.value; refreshSaveState(); }
+                }, Object.keys(BADGE_LABELS).map(function (k) {
+                    return el('option', { value: k, selected: (it.badge || '') === k ? 'selected' : null }, [BADGE_LABELS[k]]);
+                }));
                 return el('div', { 'class': 'item-row' + (it.available ? '' : ' item-row--off'), 'data-item': it.id }, [
                     bindText(it.name, 'fa', { placeholder: 'نام فارسی', 'aria-label': 'نام فارسی' }),
                     bindText(it.name, 'en', { placeholder: 'English name', dir: 'ltr', 'aria-label': 'نام انگلیسی' }),
                     price,
+                    badgeSel,
                     el('div', { 'class': 'item-row__flags' }, [
                         el('label', { 'class': 'check', title: 'اگر تیک نداشته باشد «ناموجود» نمایش داده می‌شود' }, [
                             el('input', { type: 'checkbox', checked: it.available, onchange: function (e) { it.available = e.target.checked; e.target.closest('.item-row').classList.toggle('item-row--off', !it.available); refreshSaveState(); } }), ' موجود'
@@ -481,7 +469,7 @@
                         ])
                     ])
                 ]),
-                el('div', { 'class': 'items-head' }, [el('span', null, ['نام فارسی']), el('span', null, ['نام انگلیسی']), el('span', null, ['قیمت']), el('span', null, ['وضعیت']), el('span')]),
+                el('div', { 'class': 'items-head' }, [el('span', null, ['نام فارسی']), el('span', null, ['نام انگلیسی']), el('span', null, ['قیمت']), el('span', null, ['نشان']), el('span', null, ['وضعیت']), el('span')]),
                 el('div', null, rows),
                 el('button', { 'class': 'btn btn--sm add-item', type: 'button', onclick: function () {
                     var it = { id: newId('i'), name: { fa: '', en: '' }, price: null, available: true, addon: false };
@@ -567,57 +555,98 @@
     }
 
     /* ---------- Account tab: change username / password / GitHub key ---------- */
+    /* ---------- Account tab: password change, import/export, cloud sync ---------- */
     function renderAccountTab() {
-        var curUser = input('text', { autocomplete: 'username' });
-        var curPass = input('password', { autocomplete: 'current-password' });
-        var newUser = input('text', { autocomplete: 'off' });
-        var newPass = input('password', { autocomplete: 'new-password' });
-        var newPass2 = input('password', { autocomplete: 'new-password' });
-        var newKey = input('password', { autocomplete: 'off', placeholder: 'خالی = همان کلید فعلی', required: false });
-        var btn = el('button', { 'class': 'btn btn--primary', type: 'submit' }, ['ذخیره']);
         var msg = el('div');
         function say(type, text) { msg.replaceChildren(el('div', { 'class': 'alert alert--' + type }, [text])); }
-        var form = el('form', { 'class': 'form', onsubmit: function (e) {
+
+        /* Section 1: Change Master Password */
+        var curPass = input('password', { autocomplete: 'current-password', placeholder: 'گذرواژه فعلی (پیش‌فرض: paraf2026)' });
+        var newPass = input('password', { autocomplete: 'new-password', placeholder: 'حداقل ۴ کاراکتر' });
+        var newPass2 = input('password', { autocomplete: 'new-password', placeholder: 'تکرار گذرواژه جدید' });
+        var passBtn = el('button', { 'class': 'btn btn--primary', type: 'submit' }, ['تغییر گذرواژه']);
+        var passForm = el('form', { 'class': 'form', onsubmit: function (e) {
             e.preventDefault();
-            var problem = credentialsError(newUser.value.trim(), newPass.value, newPass2.value);
-            if (problem) { say('error', problem); return; }
-            if (!authCfg) { say('error', 'حساب هنوز ساخته نشده است.'); return; }
-            busyButton(btn, true, 'در حال ذخیره…');
-            var oldToken = token;
-            unlockKey(authCfg, curUser.value, curPass.value).then(function () {
-                var k = newKey.value.trim();
-                return (k ? checkKey(k) : Promise.resolve()).then(function () { return k || oldToken; });
-            }).then(function (k) {
-                return lockKey(k, newUser.value.trim(), newPass.value).then(saveAuth).then(function () {
-                    var remembered = false;
-                    try { remembered = !!localStorage.getItem(TOKEN_KEY); } catch (e2) {}
-                    storeToken(k, remembered);
-                });
-            }).then(function () {
-                busyButton(btn, false, 'ذخیره');
-                [curUser, curPass, newUser, newPass, newPass2, newKey].forEach(function (i) { i.value = ''; });
-                say('success', 'ذخیره شد ✓ از دفعه بعد با نام کاربری و رمز جدید وارد شوید (حدود ۱ دقیقه بعد فعال می‌شود).');
+            if (curPass.value.trim() !== getAdminPass()) {
+                say('error', 'گذرواژه فعلی اشتباه است.');
+                return;
+            }
+            if (newPass.value.length < 4) {
+                say('error', 'گذرواژه جدید باید حداقل ۴ کاراکتر باشد.');
+                return;
+            }
+            if (newPass.value !== newPass2.value) {
+                say('error', 'تکرار گذرواژه جدید مطابقت ندارد.');
+                return;
+            }
+            setAdminPass(newPass.value);
+            curPass.value = ''; newPass.value = ''; newPass2.value = '';
+            say('success', 'گذرواژه با موفقیت تغییر کرد ✓ از ورود بعدی با این گذرواژه وارد شوید.');
+        } }, [
+            el('label', { 'class': 'field' }, [el('span', null, ['گذرواژه فعلی']), curPass]),
+            el('label', { 'class': 'field' }, [el('span', null, ['گذرواژه جدید']), newPass]),
+            el('label', { 'class': 'field' }, [el('span', null, ['تکرار گذرواژه جدید']), newPass2]),
+            el('div', { 'class': 'form__actions' }, [passBtn])
+        ]);
+
+        /* Section 2: Backup & Restore (Import / Export) */
+        var backupSec = el('div', { style: 'margin-top:24px;padding:16px;border-radius:14px;border:1px solid var(--line);background:var(--surface-2);' }, [
+            el('h3', { style: 'font-size:1.05rem;margin-bottom:8px;' }, ['پشتیبان‌گیری و انتقال داده‌ها (Import / Export)']),
+            el('p', { 'class': 'muted small', style: 'margin-bottom:12px;line-height:1.7;' }, [
+                'شما می‌توانید نسخه کامل منو یا اطلاعات سایت را دانلود کرده و در هر زمان یا روی سرور دیگر مجدداً بارگذاری کنید.'
+            ]),
+            el('div', { style: 'display:flex;gap:10px;flex-wrap:wrap;' }, [
+                el('button', { 'class': 'btn btn--sm', type: 'button', onclick: function () { downloadJson(data.menu, 'menu.json'); } }, ['📤 دانلود فایل menu.json']),
+                el('button', { 'class': 'btn btn--sm', type: 'button', onclick: function () { downloadJson(data.site, 'site.json'); } }, ['📤 دانلود فایل site.json']),
+                el('button', { 'class': 'btn btn--sm btn--primary', type: 'button', onclick: triggerImport }, ['📥 بارگذاری فایل JSON'])
+            ])
+        ]);
+
+        /* Section 3: Cloud GitHub Sync (Optional) */
+        var curTok = readToken();
+        var tokInp = input('password', { autocomplete: 'off', placeholder: curTok ? '••••••••••••••••••••••••' : 'github_pat_…', required: false });
+        var tokBtn = el('button', { 'class': 'btn', type: 'submit' }, [curTok ? 'به‌روزرسانی کلید' : 'ذخیره کلید GitHub']);
+        var clearTokBtn = curTok ? el('button', { 'class': 'btn btn--danger btn--sm', type: 'button', onclick: function () {
+            forgetToken();
+            renderApp();
+            say('success', 'کلید GitHub حذف شد. تغییرات شما به صورت محلی و خروجی فایلی انجام می‌شود.');
+        } }, ['قطع اتصال GitHub']) : null;
+
+        var tokForm = el('form', { 'class': 'form', onsubmit: function (e) {
+            e.preventDefault();
+            var val = tokInp.value.trim();
+            if (!val) { say('error', 'لطفاً کلید را وارد کنید.'); return; }
+            busyButton(tokBtn, true, 'در حال بررسی اتصال…');
+            checkKey(val).then(function () {
+                storeToken(val, true);
+                busyButton(tokBtn, false, 'به‌روزرسانی کلید');
+                say('success', 'اتصال به مخزن GitHub با موفقیت برقرار و ذخیره شد ✓');
+                syncShaWithGithub('menu');
+                syncShaWithGithub('site');
             }).catch(function (err) {
-                token = oldToken;
-                busyButton(btn, false, 'ذخیره');
-                say('error', err.message === 'bad' ? 'نام کاربری یا رمز فعلی اشتباه است.' : (err.message || 'ذخیره نشد.'));
+                busyButton(tokBtn, false, 'ذخیره کلید GitHub');
+                say('error', err.message || 'اتصال به GitHub ناموفق بود.');
             });
         } }, [
-            el('label', { 'class': 'field' }, [el('span', null, ['نام کاربری فعلی']), curUser]),
-            el('label', { 'class': 'field' }, [el('span', null, ['رمز عبور فعلی']), curPass]),
-            el('hr'),
-            el('label', { 'class': 'field' }, [el('span', null, ['نام کاربری جدید (می‌تواند همان قبلی باشد)']), newUser]),
-            el('label', { 'class': 'field' }, [el('span', null, ['رمز عبور جدید (حداقل ' + fa(MIN_PASSWORD) + ' کاراکتر، حرف و عدد)']), newPass]),
-            el('label', { 'class': 'field' }, [el('span', null, ['تکرار رمز عبور جدید']), newPass2]),
-            el('label', { 'class': 'field' }, [el('span', null, ['کلید GitHub جدید (اختیاری — وقتی کلید قبلی منقضی می‌شود)']), newKey]),
-            el('div', { 'class': 'form__actions' }, [btn])
+            el('label', { 'class': 'field' }, [el('span', null, ['کلید دسترسی شخصی GitHub (PAT)']), tokInp]),
+            el('div', { 'class': 'form__actions', style: 'display:flex;gap:10px;align-items:center;' }, [tokBtn, clearTokBtn].filter(Boolean))
         ]);
+
+        var cloudSec = el('div', { style: 'margin-top:24px;' }, [
+            el('h3', { style: 'font-size:1.05rem;margin-bottom:8px;' }, ['همگام‌سازی ابری GitHub (اختیاری)']),
+            el('p', { 'class': 'muted small', style: 'line-height:1.7;margin-bottom:12px;' }, [
+                'اگر کلید دسترسی GitHub را وارد کنید، هنگام زدن «ذخیره و انتشار»، تغییرات مستقیم در ریپازیتوری کامیت می‌شود.'
+            ]),
+            tokForm
+        ]);
+
         return el('section', { 'class': 'card account' }, [
-            el('h2', null, ['حساب کاربری']),
-            el('p', { 'class': 'muted' }, ['تغییر نام کاربری، رمز عبور یا کلید GitHub.']),
+            el('h2', null, ['حساب کاربری و تنظیمات']),
+            el('p', { 'class': 'muted' }, ['مدیریت گذرواژه ورود، پشتیبان‌گیری و همگام‌سازی ابری.']),
             msg,
-            form,
-            keyHelp()
+            passForm,
+            backupSec,
+            cloudSec
         ]);
     }
 
@@ -664,6 +693,22 @@
             }
             return;
         }
+
+        token = readToken();
+        if (!token) {
+            /* Local save & automatic export */
+            try {
+                localStorage.setItem('paraph_local_menu', serialize(data.menu));
+                localStorage.setItem('paraph_local_site', serialize(data.site));
+            } catch (e) {}
+            saved.menu = serialize(data.menu);
+            saved.site = serialize(data.site);
+            downloadJson(data.menu, 'menu.json');
+            refreshSaveState();
+            setStatus('ok', 'منو ذخیره شد و فایل menu.json دانلود شد ✓ (برای انتشار ابری، در تب «حساب» کلید GitHub PAT را وارد کنید)');
+            return;
+        }
+
         busy = true; refreshSaveState(); setStatus('', 'در حال ذخیره در GitHub…');
         var chain = Promise.resolve();
         ['menu', 'site'].forEach(function (k) { if (isDirty(k)) chain = chain.then(function () { return putFile(k); }); });
@@ -675,7 +720,11 @@
             if (e.status === 401) { setStatus('err', 'کلید منقضی شده است. دوباره وارد شوید (تغییرات شما هنوز در این صفحه است).'); return; }
             if (e.status === 403 || e.status === 404) { setStatus('err', 'این کلید اجازه ذخیره ندارد. در GitHub برای کلید، Contents را روی «Read and write» بگذارید.'); return; }
             if (e.status === 409 || e.status === 422) { setStatus('err', 'منو در جای دیگری تغییر کرده است. صفحه را تازه کنید و دوباره تغییر دهید.'); return; }
-            setStatus('err', 'ذخیره نشد (' + (e.status || e.message) + '). اتصال اینترنت را بررسی کنید و دوباره «ذخیره» را بزنید.');
+            /* Fallback to local save & export if GitHub failed */
+            saved.menu = serialize(data.menu);
+            saved.site = serialize(data.site);
+            downloadJson(data.menu, 'menu.json');
+            setStatus('err', 'خطا در گیت‌هاب (' + (e.status || e.message) + '). جهت امنیت، فایل menu.json به صورت خودکار در سیستم شما دانلود شد.');
         });
     }
 
