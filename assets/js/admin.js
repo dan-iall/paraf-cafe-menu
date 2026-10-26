@@ -15,7 +15,7 @@
     try { var th = localStorage.getItem('theme'); if (th === 'dark' || th === 'light') document.documentElement.setAttribute('data-theme', th); } catch (e) {}
 
     /* ---------- Repository (derived from the address, e.g. salehlava.github.io/paraf-cafe-menu) ---------- */
-    var OWNER = 'salehlava', REPO = 'paraf-cafe-menu', BRANCH = 'main';
+    var OWNER = 'dan-iall', REPO = 'paraf-cafe-menu', BRANCH = 'main';
     (function () {
         var host = /^([a-z0-9-]+)\.github\.io$/i.exec(location.hostname);
         var seg = location.pathname.split('/').filter(Boolean)[0];
