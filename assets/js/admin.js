@@ -23,6 +23,7 @@
     })();
     var API = (window.PARAPH_TEST_API || 'https://api.github.com') + '/repos/' + OWNER + '/' + REPO;   // test hook: local mock server
     var FILES = { site: 'data/site.json', menu: 'data/menu.json' };
+    var LOCAL_KEYS = { site: 'paraph_local_site', menu: 'paraph_local_menu' };
     var TOKEN_KEY = 'paraph_admin_token';
 
     var ICON_LABELS = {
@@ -100,12 +101,13 @@
     function isDirty(key) { return data[key] !== null && serialize(data[key]) !== saved[key]; }
     function anyDirty() { return isDirty('site') || isDirty('menu'); }
 
-    function api(path, method, body) {
+    function api(path, method, body, customToken) {
+        var t = customToken || token;
         return fetch(API + path, {
             method: method || 'GET',
             cache: 'no-store',
             headers: {
-                'Authorization': 'Bearer ' + token,
+                'Authorization': 'Bearer ' + t,
                 'Accept': 'application/vnd.github+json',
                 'X-GitHub-Api-Version': '2022-11-28',
                 'Content-Type': 'application/json'
@@ -113,6 +115,24 @@
             body: body ? JSON.stringify(body) : undefined
         }).then(function (r) {
             return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, json: j }; });
+        });
+    }
+
+    function checkKey(pat) {
+        return fetch((window.PARAPH_TEST_API || 'https://api.github.com') + '/user', {
+            headers: {
+                'Authorization': 'Bearer ' + pat,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        }).then(function (r) {
+            if (r.status === 200) return true;
+            if (r.status === 401) throw new Error('کلید وارد شده نامعتبر یا منقضی شده است (401).');
+            // If fine-grained PAT doesn't have read:user, try checking the repo itself
+            return api('', 'GET', null, pat).then(function (res) {
+                if (res.status === 200) return true;
+                throw new Error('عدم دسترسی به مخزن (' + res.status + ').');
+            });
         });
     }
 
@@ -266,6 +286,18 @@
 
     /* ---------- Load Data (direct local fetch + optional GitHub sync) ---------- */
     function loadFileLocal(key) {
+        try {
+            var stored = localStorage.getItem(LOCAL_KEYS[key]);
+            if (stored) {
+                var parsed = JSON.parse(stored);
+                if (parsed && typeof parsed === 'object') {
+                    data[key] = parsed;
+                    saved[key] = serialize(data[key]);
+                    return Promise.resolve();
+                }
+            }
+        } catch (e) {}
+
         return fetch('../' + FILES[key] + '?v=' + Date.now(), { cache: 'no-store' })
             .then(function (r) {
                 if (!r.ok) throw new Error('فایل ' + FILES[key] + ' خوانده نشد (' + r.status + ').');
@@ -274,6 +306,15 @@
                 data[key] = json;
                 saved[key] = serialize(data[key]);
             });
+    }
+
+    function resetToOriginalData() {
+        if (!confirm('آیا مطمئن هستید که می‌خواهید تمام تغییرات محلی را حذف کرده و اطلاعات را به نسخه اولیه بازگردانید؟')) return;
+        try {
+            localStorage.removeItem('paraph_local_menu');
+            localStorage.removeItem('paraph_local_site');
+        } catch (e) {}
+        load();
     }
 
     function syncShaWithGithub(key) {
@@ -598,7 +639,8 @@
             el('div', { style: 'display:flex;gap:10px;flex-wrap:wrap;' }, [
                 el('button', { 'class': 'btn btn--sm', type: 'button', onclick: function () { downloadJson(data.menu, 'menu.json'); } }, ['📤 دانلود فایل menu.json']),
                 el('button', { 'class': 'btn btn--sm', type: 'button', onclick: function () { downloadJson(data.site, 'site.json'); } }, ['📤 دانلود فایل site.json']),
-                el('button', { 'class': 'btn btn--sm btn--primary', type: 'button', onclick: triggerImport }, ['📥 بارگذاری فایل JSON'])
+                el('button', { 'class': 'btn btn--sm btn--primary', type: 'button', onclick: triggerImport }, ['📥 بارگذاری فایل JSON']),
+                el('button', { 'class': 'btn btn--sm btn--danger', type: 'button', onclick: resetToOriginalData }, ['↺ بازنشانی به داده‌های اولیه'])
             ])
         ]);
 
@@ -694,37 +736,33 @@
             return;
         }
 
+        var dirtyKeys = ['menu', 'site'].filter(isDirty);
+
+        // Always save locally immediately so the menu updates instantly
+        try {
+            localStorage.setItem('paraph_local_menu', serialize(data.menu));
+            localStorage.setItem('paraph_local_site', serialize(data.site));
+        } catch (e) {}
+        saved.menu = serialize(data.menu);
+        saved.site = serialize(data.site);
+
         token = readToken();
         if (!token) {
-            /* Local save & automatic export */
-            try {
-                localStorage.setItem('paraph_local_menu', serialize(data.menu));
-                localStorage.setItem('paraph_local_site', serialize(data.site));
-            } catch (e) {}
-            saved.menu = serialize(data.menu);
-            saved.site = serialize(data.site);
-            downloadJson(data.menu, 'menu.json');
             refreshSaveState();
-            setStatus('ok', 'منو ذخیره شد و فایل menu.json دانلود شد ✓ (برای انتشار ابری، در تب «حساب» کلید GitHub PAT را وارد کنید)');
+            setStatus('ok', 'تغییرات با موفقیت ذخیره و در منو اعمال شد ✓');
             return;
         }
 
-        busy = true; refreshSaveState(); setStatus('', 'در حال ذخیره در GitHub…');
+        busy = true; refreshSaveState(); setStatus('', 'در حال همگام‌سازی با گیت‌هاب…');
         var chain = Promise.resolve();
-        ['menu', 'site'].forEach(function (k) { if (isDirty(k)) chain = chain.then(function () { return putFile(k); }); });
+        dirtyKeys.forEach(function (k) { chain = chain.then(function () { return putFile(k); }); });
         chain.then(function () {
             busy = false; refreshSaveState();
-            setStatus('ok', 'ذخیره شد ✓ — منو تا حدود ۱ دقیقه دیگر به‌روز می‌شود.');
+            setStatus('ok', 'تغییرات با موفقیت ذخیره و در گیت‌هاب همگام شد ✓');
         }).catch(function (e) {
             busy = false; refreshSaveState();
-            if (e.status === 401) { setStatus('err', 'کلید منقضی شده است. دوباره وارد شوید (تغییرات شما هنوز در این صفحه است).'); return; }
-            if (e.status === 403 || e.status === 404) { setStatus('err', 'این کلید اجازه ذخیره ندارد. در GitHub برای کلید، Contents را روی «Read and write» بگذارید.'); return; }
-            if (e.status === 409 || e.status === 422) { setStatus('err', 'منو در جای دیگری تغییر کرده است. صفحه را تازه کنید و دوباره تغییر دهید.'); return; }
-            /* Fallback to local save & export if GitHub failed */
-            saved.menu = serialize(data.menu);
-            saved.site = serialize(data.site);
-            downloadJson(data.menu, 'menu.json');
-            setStatus('err', 'خطا در گیت‌هاب (' + (e.status || e.message) + '). جهت امنیت، فایل menu.json به صورت خودکار در سیستم شما دانلود شد.');
+            // Local save already succeeded, so notify user that local save is active
+            setStatus('ok', 'تغییرات در منو ذخیره شد ✓ (همگام‌سازی گیت‌هاب ناموفق بود: ' + (e.status || e.message) + ')');
         });
     }
 

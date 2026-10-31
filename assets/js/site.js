@@ -1055,7 +1055,7 @@
                 var cur = document.documentElement.getAttribute('data-theme');
                 var nxt = cur === 'dark' ? 'light' : 'dark';
                 document.documentElement.setAttribute('data-theme', nxt);
-                try { localStorage.setItem('paraph_theme', nxt); } catch (e) {}
+                try { localStorage.setItem('theme', nxt); } catch (e) {}
             });
         }
     }
@@ -1064,14 +1064,25 @@
         document.body.replaceChildren(el('p', { style: 'padding:40px 16px;text-align:center;font-family:Vazirmatn,sans-serif' }, [t('error')]));
     }
 
-    function getJson(path) {
+    function getJson(path, localKey) {
+        if (localKey) {
+            try {
+                var stored = localStorage.getItem(localKey);
+                if (stored) {
+                    var parsed = JSON.parse(stored);
+                    if (parsed && typeof parsed === 'object') {
+                        return Promise.resolve(parsed);
+                    }
+                }
+            } catch (e) {}
+        }
         return fetch(path + '?v=' + Date.now(), { cache: 'no-store' }).then(function (r) {
             if (!r.ok) throw new Error(path + ' ' + r.status);
             return r.json();
         });
     }
 
-    Promise.all([getJson('data/site.json'), getJson('data/menu.json')]).then(function (res) {
+    Promise.all([getJson('data/site.json', 'paraph_local_site'), getJson('data/menu.json', 'paraph_local_menu')]).then(function (res) {
         var site = res[0] || {}, menu = res[1] || {};
         applyTheme(site.colors);
         if (PAGE === 'welcome') {
