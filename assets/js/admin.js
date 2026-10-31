@@ -736,45 +736,31 @@
             return;
         }
 
+        // Always save locally immediately so the menu updates instantly
+        try {
+            localStorage.setItem('paraph_local_menu', serialize(data.menu));
+            localStorage.setItem('paraph_local_site', serialize(data.site));
+        } catch (e) {}
+        saved.menu = serialize(data.menu);
+        saved.site = serialize(data.site);
+
         token = readToken();
         if (!token) {
-            /* Local save & automatic export */
-            try {
-                localStorage.setItem('paraph_local_menu', serialize(data.menu));
-                localStorage.setItem('paraph_local_site', serialize(data.site));
-            } catch (e) {}
-            saved.menu = serialize(data.menu);
-            saved.site = serialize(data.site);
-            downloadJson(data.menu, 'menu.json');
             refreshSaveState();
-            setStatus('ok', 'منو ذخیره شد و فایل menu.json دانلود شد ✓ (برای انتشار ابری، در تب «حساب» کلید GitHub PAT را وارد کنید)');
+            setStatus('ok', 'تغییرات با موفقیت ذخیره و در منو اعمال شد ✓');
             return;
         }
 
-        busy = true; refreshSaveState(); setStatus('', 'در حال ذخیره در GitHub…');
+        busy = true; refreshSaveState(); setStatus('', 'در حال همگام‌سازی با گیت‌هاب…');
         var chain = Promise.resolve();
         ['menu', 'site'].forEach(function (k) { if (isDirty(k)) chain = chain.then(function () { return putFile(k); }); });
         chain.then(function () {
-            try {
-                localStorage.setItem('paraph_local_menu', serialize(data.menu));
-                localStorage.setItem('paraph_local_site', serialize(data.site));
-            } catch (err) {}
             busy = false; refreshSaveState();
-            setStatus('ok', 'ذخیره شد ✓ — منو تا حدود ۱ دقیقه دیگر به‌روز می‌شود.');
+            setStatus('ok', 'تغییرات با موفقیت ذخیره و در گیت‌هاب همگام شد ✓');
         }).catch(function (e) {
             busy = false; refreshSaveState();
-            if (e.status === 401) { setStatus('err', 'کلید منقضی شده است. دوباره وارد شوید (تغییرات شما هنوز در این صفحه است).'); return; }
-            if (e.status === 403 || e.status === 404) { setStatus('err', 'این کلید اجازه ذخیره ندارد. در GitHub برای کلید، Contents را روی «Read and write» بگذارید.'); return; }
-            if (e.status === 409 || e.status === 422) { setStatus('err', 'منو در جای دیگری تغییر کرده است. صفحه را تازه کنید و دوباره تغییر دهید.'); return; }
-            /* Fallback to local save & export if GitHub failed */
-            try {
-                localStorage.setItem('paraph_local_menu', serialize(data.menu));
-                localStorage.setItem('paraph_local_site', serialize(data.site));
-            } catch (err) {}
-            saved.menu = serialize(data.menu);
-            saved.site = serialize(data.site);
-            downloadJson(data.menu, 'menu.json');
-            setStatus('err', 'خطا در گیت‌هاب (' + (e.status || e.message) + '). جهت امنیت، فایل menu.json به صورت خودکار در سیستم شما دانلود شد.');
+            // Local save already succeeded, so notify user that local save is active
+            setStatus('ok', 'تغییرات در منو ذخیره شد ✓ (همگام‌سازی گیت‌هاب ناموفق بود: ' + (e.status || e.message) + ')');
         });
     }
 
