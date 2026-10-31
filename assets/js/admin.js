@@ -736,6 +736,8 @@
             return;
         }
 
+        var dirtyKeys = ['menu', 'site'].filter(isDirty);
+
         // Always save locally immediately so the menu updates instantly
         try {
             localStorage.setItem('paraph_local_menu', serialize(data.menu));
@@ -753,7 +755,7 @@
 
         busy = true; refreshSaveState(); setStatus('', 'در حال همگام‌سازی با گیت‌هاب…');
         var chain = Promise.resolve();
-        ['menu', 'site'].forEach(function (k) { if (isDirty(k)) chain = chain.then(function () { return putFile(k); }); });
+        dirtyKeys.forEach(function (k) { chain = chain.then(function () { return putFile(k); }); });
         chain.then(function () {
             busy = false; refreshSaveState();
             setStatus('ok', 'تغییرات با موفقیت ذخیره و در گیت‌هاب همگام شد ✓');
